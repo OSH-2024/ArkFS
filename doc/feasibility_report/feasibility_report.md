@@ -174,7 +174,9 @@ ner("My name is Sylvain and I work at Hugging Face in Brooklyn.")
 
 ### 3.2 最新进展 -- AIOS
 
+### 3.3 Next4快照备份技术
 
+目前，Linux上可用的备份技术并不够高效，因为它们在运行时会阻塞 I/O 操作以确保数据完整性。Next4提供了一种基于Ext4文件系统快照技术的解决方案而不影响Ext4的主要结构。
 
 <br>
 

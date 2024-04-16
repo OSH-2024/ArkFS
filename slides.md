@@ -45,7 +45,11 @@ transition: slide-right
 
 # 项目简介
 
+传统文件系统的设计理念是基于文件的存储和管理，但是随着数据量的增长，文件系统的性能和可扩展性受到了严重的挑战。为了解决这一问题，研究人员提出了基于大模型的文件系统设计理念。大模型是一种基于深度学习的技术，可以对海量数据进行高效的处理和管理。大模型的引入为文件系统的设计提供了新的思路，可以有效地提高文件系统的性能和可扩展性。
 
+最近，研究人员将大模型嵌入操作系统，研究出了AIOS（即大语言模型智能体操作系统），为操作系统的智能化提供了框架。
+
+本小组拟在AIOS思想的基础上，在应用和内核层面优化文件索引技术、存储结构和数据备份及恢复技术，以提高文件系统的性能和可靠性。
 
 ---
 transition: fade-out
@@ -101,79 +105,325 @@ transition: slide-up
 
 ## 大语言模型
 
-# 实验计划
+<br>
 
-根据现实情况，我们设计了一系列验证实验，并将在接下来的几个月内进行验证。
----
-## 过去：
-![VMware](pics/shotcat.png)
- 配置好VMware，准备好Gemini/openai的api，测试网络可行；在合适的环境下编译AIOS提供的内核源代码。
----
-## 现在：
-  使用一些常见的系统调用来完成文件操作.
-  分析现有系统调用的性能特征和瓶颈，以及可能的优化方向。
----
-## 未来：
-![lockdown](pics/yuqi.png)
-### 1.探索尝试
-   根据分析结果，选择一些关键的系统调用进行优化，我们将把精力集中在文件管理上，
-   编写优化系统调用函数，以提高其性能和效率。
----
-### 2.近期展望
-   比较优化前后的性能指标，包括系统调用的响应时间、吞吐量等。。
-   进行综合性的性能测试和评估，并根据测试结果调整和优化系统调用的实现。
----
-### 3.远景目标
-   
-   实现一个可以智能调用的，可以代替人工操作的，新一代文件管理系统。例如无需用户操作的自动存储，文件自动存储到用户指定位置或大模型认定的"文件相关"位置。
+#### 文本内容深度理解与分析
+
+<br>
+
+- 自动摘要
+
+<v-click>
+
+```python
+[{'summary_text': ' America has changed dramatically during recent years . The '
+                  'number of engineering graduates in the U.S. has declined in '
+                  'traditional engineering disciplines such as mechanical, civil '
+                  ', electrical, chemical, and aeronautical engineering . Rapidly '
+                  'developing economies such as China and India, as well as other '
+                  'industrial countries in Europe and Asia, continue to encourage '
+                  'and advance engineering .'}]
+```
+</v-click>
 
 ---
-
-## 评测方法：
-  ### 对于实现探索尝试阶段：
-  观察AIOS提供的内核是否可用，其大模型集成效果：确保系统能够正常启动，并且能够运行常见的任务和应用程序。
----
-  ### 对于实现近期展望阶段：
-  编写简单的程序来测试新的系统调用，确保其可以正常调用并执行所需的功能。主要通过同一文件索引计时对比：
----
-  ### 对于实现远景目标阶段：
-  主观体验，新一代大模型集成的文件系统应与传统操作系统有鲜明对比:主要在于用户体验感的极大提升。用户可以通过大模型直接或间接指定文件位置，而不是手动操作文件拖拽。文件的存储策略也应该有很大提升，相邻相关的文件内容应该分配在同一空间内，这些都是我们的愿景目标的直接体现方式。
+level: 2
 ---
 
-## 挑战与应对
+# 技术可行性
+
+## 大语言模型
+
+<br>
+
+#### 文本内容深度理解与分析
+
+<br>
+
+- 智能回答
+  
+<v-click>
+
+```python
+from transformers import pipeline
+
+question_answerer = pipeline("question-answering")
+question_answerer(
+    question="Where do I work?",
+    context="My name is Sylvain and I work at Hugging Face in Brooklyn",
+)
+```
+
+```python
+{'score': 0.6385916471481323, 'start': 33, 'end': 45, 'answer': 'Hugging Face'}
+```
+
+</v-click>
 
 ---
+level: 2
+---
+
+# 技术可行性
+
+## 大语言模型
+
+<br>
+
+#### 文件管理智能化
+
+<br>
+
+- 文件组织与检索
+  
+<v-click>
+
+```python
+from transformers import pipeline
+
+classifier = pipeline("zero-shot-classification")
+classifier(
+    "This is a course about the Transformers library",
+    candidate_labels=["education", "politics", "business"],
+)
+```
+
+```python
+{'sequence': 'This is a course about the Transformers library',
+ 'labels': ['education', 'business', 'politics'],
+ 'scores': [0.8445963859558105, 0.111976258456707, 0.043427448719739914]}
+```
+
+</v-click>
+
+---
+level: 2
+---
+
+# 技术可行性
+
+## 大语言模型
+
+<br>
+
+#### 文件管理智能化
+
+<br>
+
+- 文件安全与权限控制
+
+<v-click>
+
+````md magic-move
+
+//step 1
+```python {1-4|6}
+from transformers import pipeline
+
+classifier = pipeline("sentiment-analysis")
+classifier("I've been waiting for a HuggingFace course my whole life.")
+
+[{'label': 'POSITIVE', 'score': 0.9598047137260437}]
+```
+
+//step 2
+```python{1-4|6-8}
+from transformers import pipeline
+
+ner = pipeline("ner", grouped_entities=True)
+ner("My name is Sylvain and I work at Hugging Face in Brooklyn.")
+
+[{'entity_group': 'PER', 'score': 0.99816, 'word': 'Sylvain', 'start': 11, 'end': 18}, 
+ {'entity_group': 'ORG', 'score': 0.97960, 'word': 'Hugging Face', 'start': 33, 'end': 45}, 
+ {'entity_group': 'LOC', 'score': 0.99321, 'word': 'Brooklyn', 'start': 49, 'end': 57}
+]
+```
+````
+</v-click>
+
+---
+level: 2
+---
+
+# 技术可行性
+
+## AIOS
+
+<br>
+
+AIOS是一种LLM智能体操作系统，将大语言模型嵌入操作系统（OS）作为OS的大脑，实现了``有灵魂''的操作系统，即能够独立运行、做出决策和执行任务而无需或需要最少的人工干预的系统。这些代理旨在理解指令、处理信息、做出决策并采取行动以实现自主状态。
+
+<br>
+
+![AIOS](https://github.com/OSH-2024/ArkFS/blob/main/doc/feasibility_report/src/example.png?raw=true)
+
+---
+level: 2
+---
+
+# 技术可行性
+
+## AIOS
+
+<br>
+
+此外，AIOS为用户提供了AIOS SDK，一个丰富的工具包来抽象较低级别系统功能的复杂性，从而允许开发代理应用程序。这使开发人员能够专注于其代理的基本逻辑和功能，从而促进更高效的开发过程。AIOS SDK组成了AIOS的Application Kernel，是用户与OS直接交互的接口。
+
+<Transform :scale="0.75">
+
+![sdk](https://github.com/OSH-2024/ArkFS/blob/main/doc/feasibility_report/src/sdk.png?raw=true)
+
+</Transform>
+
+---
+level: 2
+---
+
+# 技术可行性
+
+## AIOS
+
+在实现文件存储方面，AIOS使用内存管理器和存储管理器分别处理短期快速存储和长期存储的文件管理。
+
+<br>
+
+- 内存管理器管理代理生命周期内的短期内存，确保只有在代理处于活动状态（等待执行或运行时）时才能存储和访问数据。
+  
+  未来可以考虑将更复杂的内存机制（如代理之间的共享内存池或分层缓存）集成到AIOS中。内存管理器实现了快速的数据检索和处理，有助于对用户查询和交互做出快速响应，而不会给AIOS的存储带来过重负担。
+
+- 存储管理器负责数据的长期保存，监督需要无限期保留的信息的存储，这些信息超过了任何单个代理的活动寿命。
+  
+  AIOS中的这种永久存储是通过各种耐用介质实现的，如本地文件、数据库或基于云的解决方案，确保数据的完整性和可用性，以供未来参考或分析。存储管理器支持检索扩充。通过存储用户偏好和维护历史交互日志，存储管理器可以丰富代理知识更新，增强长期用户体验。
+
+
+---
+level: 2
+---
+
+# 技术可行性
+
+## AIOS
+
+目前，LLM内核中的LLM系统调用接口提供了基本的LLM调用操作功能，包括代理管理、上下文处理、内存和存储操作以及访问控制。这个接口充当了复杂代理请求和不同内核模块执行之间的桥梁。LLM系统调用列表将来可以进一步扩展，以支持更多操作。
+
+<Transform :scale="0.5">
+
+![syscall](https://github.com/OSH-2024/ArkFS/blob/main/doc/feasibility_report/src/syscall.png?raw=true)
+
+</Transform>
+
+---
+layout: two-cols
+---
+
+# 风险与挑战
 
 ### 眼下困境
 
-政策封锁，API可以下载，但无法启动，报错状态码400。  
-小组合作寻找VPN多日未果，寻求国外同学帮助。  
-![lockdown](pics/lock.png)
----
+政策封锁，API可以下载，
+
+但由于ip限制，无法使用
+
+<Transform :scale="0.6">
+
+![lockdown](https://github.com/OSH-2024/ArkFS/blob/main/pics/lock.png?raw=true)
+
+</Transform>
+
+::right::
+
+<br>
+
 ### 中长期挑战
 
-大模型训练集难以获得，训练方法尚待讨论。  
-小组四人，接口优化能否实现，如何实现，需要时间。  
-文件系统如何设计，如何优化，需要大量时间尝试。
-![filesys](pics/filesystem.png)
----
+大模型训练集难以获得，训练方法尚待讨论
+
+小组四人，接口优化能否实现，如何实现
+
+文件系统如何设计，如何优化
+
+<br>
+
 ### 应用风险
 
-AI暂不能100%理解人类意图，执行结果差强人意。  
-AI黑盒，人类不知晓执行过程，本地文件面临风险。  
-![AIserver](pics/AIserver.png)
----
-### 应对措施
+AI暂不能100%理解人类意图，执行结果差强人意  
 
-1、短期应对：本周之内解决网络封锁问题，进入真正的执行阶段。  
-2、中长期应对：大量开会讨论，彻底确定小组工作的细节和方法。  
-3、长期应对：反复训练，反复试错，直至达到目标正确率。
+AI黑盒，人类不知晓执行过程，本地文件面临风险  
+
+
+---
+transition: slide-up
 ---
 
+# 实验计划
 
+根据现实情况，我们设计了一系列验证实验，并将在接下来的几个月内进行验证。
+
+### 已完成
+
+<br>
+
+配置好VMware，准备好Gemini/openai的api，测试网络可行；在合适的环境下编译AIOS提供的内核源代码。
+
+---
+level: 2
+---
+
+### 已完成
+
+![res1](https://github.com/OSH-2024/ArkFS/blob/main/78a18c69e72afe97a150acdb4f908c0b.png?raw=true)
+
+---
+level: 2
+---
+
+### 已完成
+
+![res2](https://github.com/OSH-2024/ArkFS/blob/main/6ecf8fb7b1b134aa4dbdfbef0cc0486e.png?raw=true)
+
+---
+level: 2
+---
+
+### 已完成
+
+![res3](https://github.com/OSH-2024/ArkFS/blob/main/9d14a80eddd3d4ede70631adb6e3f7d4.png?raw=true)
+
+
+---
+level: 2
+---
+
+# 实验计划
+
+### 待完成
+
+- 探索尝试
+
+观察AIOS提供的内核是否可用，其大模型集成效果：确保系统能够正常启动，并且能够运行常见的任务和应用程序。
+   
+根据分析结果，选择一些关键的系统调用进行优化，我们将把精力集中在文件管理上，编写优化系统调用函数，以提高其性能和效率。
+
+- 近期展望
+  
+编写简单的程序来测试新的系统调用，确保其可以正常调用并执行所需的功能。
+
+比较优化前后的性能指标，包括系统调用的响应时间、吞吐量等。进行综合性的性能测试和评估，并根据测试结果调整和优化系统调用的实现。
+
+- 远景目标
+   
+实现一个可以智能调用的，可以代替人工操作的，新一代文件管理系统。例如无需用户操作的自动存储，文件自动存储到用户指定位置或大模型认定的"文件相关"位置。
+
+--- 
+transition: slide-up
+---
 
 # 结论
 
-  经过一个月的调研与讨论，我们发现了目前大模型和OS结合的前沿方向，并获得了前人宝贵的开发经验。在此基础上，我们认为我们可以通过更进一步的开发，增加OS的功能，尤其是文件系统的相关功能。
+<br>
+
+经过一个月的调研与讨论，我们发现了目前大模型和OS结合的前沿方向，并获得了前人宝贵的开发经验。在此基础上，我们认为我们可以通过更进一步的开发，增加OS的功能，尤其是文件系统的相关功能。
+
+<br>
   
-  我们设计了实验，打算从AIOS提供的基础版LLM+OS出发，优化一些SDK，并尝试新增一些syscall，来验证我们的工作是可行的，大模型是可以进一步融入文件系统的管理的，相关功能(文件自动归档、依靠大模型搜索文件)是有希望实现的。
+我们设计了实验，打算从AIOS提供的基础版LLM+OS出发，优化一些SDK，并尝试新增一些syscall，来验证我们的工作是可行的，大模型是可以进一步融入文件系统的管理的，相关功能(文件自动归档、依靠大模型搜索文件)是有希望实现的。

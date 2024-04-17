@@ -18,9 +18,14 @@ mdc: true
 
 <br>
 
-汇报人: 杨柄权
+汇报人: 杨柄权     
 
-小组成员：杨柄权、常圣、李岱峰、刘明乐
+汇报时间: 2024/4/17
+
+<br>
+
+<div style="font-size: 12px">
+小组成员：杨柄权、常圣、李岱峰、刘明乐</div>
 
 
 <div class="pt-12">
@@ -36,10 +41,19 @@ image: https://cover.sli.dev
 
 # 目录
 
-<Toc v-click minDepth="1" maxDepth="1"></Toc>
+<Toc minDepth="1" maxDepth="1"></Toc>
+
+--- 
+layout: cover
+background: https://cover.sli.dev
+class: text-center
+---
+
+# 项目简介
 
 ---
-transition: slide-right
+transition: slide-down
+level: 2
 ---
 
 # 项目简介
@@ -50,9 +64,21 @@ transition: slide-right
 
 本小组拟在AIOS思想的基础上，在应用和内核层面优化文件索引技术、存储结构和数据备份及恢复技术，以提高文件系统的性能和可靠性。
 
+<!-- This is a test for context-->
+
+--- 
+layout: cover
+background: https://cover.sli.dev
+class: text-center
+---
+
+# 项目背景
+
 ---
 transition: fade-out
+level: 2
 ---
+
 
 # 项目背景
 
@@ -65,9 +91,18 @@ transition: fade-out
 
 </Transform>
 
+--- 
+layout: cover
+background: https://cover.sli.dev
+class: text-center
+---
+
+# 理论依据
+
 ---
 layout: image-right
 image: https://cover.sli.dev
+level: 2
 ---
 
 # 理论依据
@@ -96,8 +131,17 @@ Ext4是第四代扩展文件系统，是Linux系统下的日志文件系统，�
   
 </v-click>
 
+--- 
+layout: cover
+background: https://cover.sli.dev
+class: text-center
+---
+
+# 技术可行性
+
 ---
 transition: slide-up
+level: 2
 ---
 
 # 技术可行性
@@ -311,8 +355,17 @@ level: 2
 
 </Transform>
 
+--- 
+layout: cover
+background: https://cover.sli.dev
+class: text-center
+---
+
+# 风险与挑战
+
 ---
 layout: two-cols
+level: 2
 ---
 
 # 风险与挑战
@@ -349,9 +402,18 @@ AI暂不能100%理解人类意图，执行结果差强人意
 
 AI黑盒，人类不知晓执行过程，本地文件面临风险  
 
+--- 
+layout: cover
+background: https://cover.sli.dev
+class: text-center
+---
+
+# 进度与计划
+
 
 ---
 transition: slide-up
+level: 2
 ---
 
 # 进度与计划
@@ -414,7 +476,16 @@ level: 2
 实现一个可以智能调用的，可以代替人工操作的，新一代文件管理系统。例如无需用户操作的自动存储，文件自动存储到用户指定位置或大模型认定的"文件相关"位置。
 
 --- 
+layout: cover
+background: https://cover.sli.dev
+class: text-center
+---
+
+# 结论
+
+--- 
 transition: slide-up
+level: 2
 ---
 
 # 结论
@@ -431,6 +502,7 @@ transition: slide-up
 layout: cover
 background: https://cover.sli.dev
 class: text-center
+level: 2
 ---
 
 # Thanks for listening!

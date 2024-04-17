@@ -370,7 +370,7 @@ level: 2
 
 ### 已完成
 
-![res1](https://github.com/OSH-2024/ArkFS/blob/main/78a18c69e72afe97a150acdb4f908c0b.png?raw=true)
+![res1](https://github.com/OSH-2024/ArkFS/blob/main/pics/78a18c69e72afe97a150acdb4f908c0b.png?raw=true)
 
 ---
 level: 2
@@ -378,7 +378,7 @@ level: 2
 
 ### 已完成
 
-![res2](https://github.com/OSH-2024/ArkFS/blob/main/6ecf8fb7b1b134aa4dbdfbef0cc0486e.png?raw=true)
+![res2](https://github.com/OSH-2024/ArkFS/blob/main/pics/6ecf8fb7b1b134aa4dbdfbef0cc0486e.png?raw=true)
 
 ---
 level: 2
@@ -386,7 +386,7 @@ level: 2
 
 ### 已完成
 
-![res3](https://github.com/OSH-2024/ArkFS/blob/main/9d14a80eddd3d4ede70631adb6e3f7d4.png?raw=true)
+![res3](https://github.com/OSH-2024/ArkFS/blob/main/pics/9d14a80eddd3d4ede70631adb6e3f7d4.png?raw=true)
 
 
 ---

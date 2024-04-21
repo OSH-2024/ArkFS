@@ -20,15 +20,15 @@ mdc: true
 
 汇报人: 杨柄权     
 
-汇报时间: 2024/4/17
+汇报时间: 2024/4/22
 
 <br>
 
-<div style="font-size: 12px">
+<div style="font-size: 15px">
 小组成员：杨柄权、常圣、李岱峰、刘明乐</div>
 
 
-<div class="pt-12">
+<div class="fixed bottom-0 right-0">
   <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
     Press Space for next page <carbon:arrow-right class="inline"/>
   </span>
@@ -42,6 +42,7 @@ image: https://cover.sli.dev
 # 目录
 
 <Toc minDepth="1" maxDepth="1"></Toc>
+
 
 --- 
 layout: cover
@@ -63,8 +64,6 @@ level: 2
 最近，研究人员将大模型嵌入操作系统，研究出了AIOS（即大语言模型智能体操作系统），为操作系统的智能化提供了框架。
 
 本小组拟在AIOS思想的基础上，在应用和内核层面优化文件索引技术、存储结构和数据备份及恢复技术，以提高文件系统的性能和可靠性。
-
-<!-- This is a test for context-->
 
 --- 
 layout: cover
@@ -90,6 +89,7 @@ level: 2
 ![AI](https://cioctocdo.com/sites/default/files/inline-images/2e8bfd65-5272-4cf1-8b86-954bab975bab_2400x1350.jpg)
 
 </Transform>
+
 
 --- 
 layout: cover
@@ -130,6 +130,34 @@ Ext4是第四代扩展文件系统，是Linux系统下的日志文件系统，�
 - 在线碎片整理 
   
 </v-click>
+
+---
+layout: two-cols-header
+transition: slide-left
+level: 2
+---
+
+# 理论依据
+
+## 深度学习
+
+深度学习是机器学习的一个分支，是一种基于对数据进行表征学习的算法。深度学习的核心是神经网络，通过神经网络的层次化结构，可以对数据进行高效的表征学习。
+
+::left::
+
+<Transform :scale="0.9">
+
+![layers](https://github.com/OSH-2024/ArkFS/blob/main/pics/layers.png?raw=true)
+
+</Transform>
+
+::right::
+
+- 通过设计建立适量的神经元计算节点和多层运算层次结构，选择合适的输入层和输出层，通过网络的学习和调优，建立起从输入到输出的函数关系。
+
+<br>
+
+- 使用训练成功的网络模型，就可以实现我们对复杂事务处理的自动化要求。
 
 --- 
 layout: cover
@@ -298,7 +326,13 @@ AIOS是一种LLM智能体操作系统，将大语言模型嵌入操作系统（O
 
 <br>
 
+<Transform :scale="0.8">
+
 ![AIOS](https://github.com/OSH-2024/ArkFS/blob/main/doc/feasibility_report/src/example.png?raw=true)
+
+</Transform>
+
+
 
 ---
 level: 2
@@ -312,7 +346,8 @@ level: 2
 
 此外，AIOS为用户提供了AIOS SDK，一个丰富的工具包来抽象较低级别系统功能的复杂性，从而允许开发代理应用程序。这使开发人员能够专注于其代理的基本逻辑和功能，从而促进更高效的开发过程。AIOS SDK组成了AIOS的Application Kernel，是用户与OS直接交互的接口。
 
-<Transform :scale="0.75">
+
+<Transform :scale="0.6">
 
 ![sdk](https://github.com/OSH-2024/ArkFS/blob/main/doc/feasibility_report/src/sdk.png?raw=true)
 
@@ -347,9 +382,12 @@ level: 2
 
 ## AIOS
 
+<br>
+
 目前，LLM内核中的LLM系统调用接口提供了基本的LLM调用操作功能，包括代理管理、上下文处理、内存和存储操作以及访问控制。这个接口充当了复杂代理请求和不同内核模块执行之间的桥梁。LLM系统调用列表将来可以进一步扩展，以支持更多操作。
 
-<Transform :scale="0.5">
+
+<Transform :scale="0.45">
 
 ![syscall](https://github.com/OSH-2024/ArkFS/blob/main/doc/feasibility_report/src/syscall.png?raw=true)
 
@@ -432,7 +470,7 @@ level: 2
 
 ### 已完成
 
-![res1](https://github.com/OSH-2024/ArkFS/blob/main/pics/78a18c69e72afe97a150acdb4f908c0b.png?raw=true)
+![res1](https://github.com/OSH-2024/ArkFS/blob/main/pics/fengli-4.20-4.png?raw=true)
 
 ---
 level: 2
@@ -440,7 +478,7 @@ level: 2
 
 ### 已完成
 
-![res2](https://github.com/OSH-2024/ArkFS/blob/main/pics/6ecf8fb7b1b134aa4dbdfbef0cc0486e.png?raw=true)
+![res2](https://github.com/OSH-2024/ArkFS/blob/main/pics/fengli-4.20-5.png?raw=true)
 
 ---
 level: 2
@@ -448,7 +486,25 @@ level: 2
 
 ### 已完成
 
-![res3](https://github.com/OSH-2024/ArkFS/blob/main/pics/9d14a80eddd3d4ede70631adb6e3f7d4.png?raw=true)
+![res3](https://github.com/OSH-2024/ArkFS/blob/main/pics/fengli-4.20-6.png?raw=true)
+
+
+---
+level: 2
+---
+
+### 已完成
+
+![res4](https://github.com/OSH-2024/ArkFS/blob/main/pics/fengli-4.20-7.png?raw=true)
+
+
+---
+level: 2
+---
+
+### 已完成
+
+![res5](https://github.com/OSH-2024/ArkFS/blob/main/pics/fengli-4.20-8.png?raw=true)
 
 
 ---
@@ -461,8 +517,7 @@ level: 2
 
 - 探索尝试
 
-观察AIOS提供的内核是否可用，其大模型集成效果：确保系统能够正常启动，并且能够运行常见的任务和应用程序。
-   
+
 根据分析结果，选择一些关键的系统调用进行优化，我们将把精力集中在文件管理上，编写优化系统调用函数，以提高其性能和效率。
 
 - 近期展望

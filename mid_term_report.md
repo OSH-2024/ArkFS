@@ -1,5 +1,5 @@
 ---
-theme: seriph
+theme: default
 background: https://cover.sli.dev
 title: AIFS, Artificial Intelligence File System
 info: 
@@ -99,6 +99,38 @@ class: text-center
 
 # 理论依据
 
+
+---
+layout: two-cols-header
+image: https://cover.sli.dev
+level: 2
+---
+
+# 理论依据
+
+## Ext4文件系统
+
+Ext4是第四代扩展文件系统，是Linux系统下的日志文件系统，是Ext3文件系统的后继版本。
+
+::left::
+
+ext4文件系统主要由以下几部分组成：
+
+- 超级块（Super Block）：包含文件系统基本信息，例如文件系统类型、块大小、块组数量等。
+- 块组描述符（Group Descriptor）：包含每个块组的信息，例如空闲块数量、已分配块数量等。
+- 索引节点（Inode）：包含文件或目录的基本信息，例如文件大小、权限、数据块位置等。
+- 数据块（Data Block）：存储文件或目录的实际数据。
+
+
+::right::
+
+<Transform :scale="1.1">
+
+![ext4](https://github.com/OSH-2024/ArkFS/blob/main/pics/ext4.png?raw=true)
+
+</Transform>
+
+
 ---
 layout: image-right
 image: https://cover.sli.dev
@@ -108,12 +140,6 @@ level: 2
 # 理论依据
 
 ## Ext4文件系统
-
-<v-click>
-
-Ext4是第四代扩展文件系统，是Linux系统下的日志文件系统，是Ext3文件系统的后继版本。
-
-</v-click>
 
 <v-click>
 
@@ -184,7 +210,6 @@ level: 2
 
 - 自动摘要
 
-<v-click>
 
 ```python
 [{'summary_text': ' America has changed dramatically during recent years . The '
@@ -195,7 +220,6 @@ level: 2
                   'industrial countries in Europe and Asia, continue to encourage '
                   'and advance engineering .'}]
 ```
-</v-click>
 
 ---
 level: 2
@@ -213,7 +237,6 @@ level: 2
 
 - 智能回答
   
-<v-click>
 
 ```python
 from transformers import pipeline
@@ -229,7 +252,6 @@ question_answerer(
 {'score': 0.6385916471481323, 'start': 33, 'end': 45, 'answer': 'Hugging Face'}
 ```
 
-</v-click>
 
 ---
 level: 2
@@ -247,7 +269,6 @@ level: 2
 
 - 文件组织与检索
   
-<v-click>
 
 ```python
 from transformers import pipeline
@@ -265,7 +286,6 @@ classifier(
  'scores': [0.8445963859558105, 0.111976258456707, 0.043427448719739914]}
 ```
 
-</v-click>
 
 ---
 level: 2
@@ -283,7 +303,6 @@ level: 2
 
 - 文件安全与权限控制
 
-<v-click>
 
 ````md magic-move
 
@@ -310,7 +329,6 @@ ner("My name is Sylvain and I work at Hugging Face in Brooklyn.")
 ]
 ```
 ````
-</v-click>
 
 ---
 level: 2
@@ -402,7 +420,7 @@ class: text-center
 # 风险与挑战
 
 ---
-layout: two-cols
+transition: slide-down
 level: 2
 ---
 
@@ -410,35 +428,40 @@ level: 2
 
 ### 眼下困境
 
-政策封锁，API可以下载，
+<br>
 
-但由于ip限制，无法使用
+- ip限制，无法获得预期结果
 
-<Transform :scale="0.6">
 
-![lockdown](https://github.com/OSH-2024/ArkFS/blob/main/pics/lock.png?raw=true)
+<Transform :scale="1.0">
+
+![lockdown](https://github.com/OSH-2024/ArkFS/blob/main/pics/9d14a80eddd3d4ede70631adb6e3f7d4.png?raw=true)
 
 </Transform>
 
-::right::
+---
+transition: fade-out
+layout: two-cols
+level: 2
+---
 
-<br>
+# 风险与挑战
 
 ### 中长期挑战
 
-大模型训练集难以获得，训练成本较高
+- 大模型训练集难以获得，训练成本较高
 
-接口优化能否实现，如何实现
+- 接口优化能否实现，如何实现
 
-文件系统如何设计，如何优化
+- 文件系统如何设计，如何优化
 
 <br>
 
 ### 应用风险
 
-AI暂不能100%理解人类意图，执行结果差强人意  
+- AI暂不能100%理解人类意图，执行结果差强人意  
 
-AI黑盒，人类不知晓执行过程，本地文件面临风险  
+- AI黑盒，人类不知晓执行过程，本地文件面临风险  
 
 --- 
 layout: cover

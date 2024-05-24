@@ -1,9 +1,11 @@
 
 
- ## 1 .pip install  faiss-cpu sentence-transformers
+ ## 1 .向量化检索的构建
+ 
+ pip install  faiss-cpu sentence-transformers
 
 
-在 Faiss 中，检索结果的距离（distance）表示查询向量与检索结果向量之间的相似度。距离越小，表示两个向量之间的相似度越高
+在 Faiss 中，检索结果的距离（distance）表示查询向量与检索结果向量之间的相似度。距离越小，表示两个向量之间的相似度越高，参考example.py
 
 ## 2.本地索引库
 
@@ -18,3 +20,6 @@
 ## 4.新文件夹
 
 将聚合类找到后，我考虑以Representative word为名字，建立文件夹，将文件索引放进去，这样来实现一个简单的文件聚合存储功能。下面需要的就是系统层面，将index转换为系统文件指针，真的将文件存入到新建的文件夹中而不是一个索引。
+
+这部分功能在new_folder里实现。
+

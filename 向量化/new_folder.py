@@ -20,7 +20,7 @@ embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 document_embeddings = embedding_model.encode(documents)
 
 # 设置聚类数量
-num_clusters = 5  # 假设您想将文档分成5类
+num_clusters = 5  # 假设将文档分成5类
 
 # 进行K-means聚类
 kmeans = KMeans(n_clusters=num_clusters, random_state=0)

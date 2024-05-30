@@ -1,4 +1,4 @@
-   "I love programming in Python",
+   "I love programming in Python", 
     "Python is a great language",
     "I enjoy learning new things",
     "Machine learning is fascinating",

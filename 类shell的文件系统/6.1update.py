@@ -1,21 +1,53 @@
 import os
 import shutil
 from sentence_transformers import SentenceTransformer
+from transformers import pipeline, BlipProcessor, BlipForConditionalGeneration
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
+import torch
+import warnings
 
-
-import warnings    #消除未知的警报
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+# 使用transformers库中的summarization管道来生成文本摘要
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
-# 读取文本文件中的数据
-def read_documents(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        documents = file.readlines()
-    return [doc.strip() for doc in documents]
+# 使用transformers库中的BLIP模型来生成图像描述
+blip_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+
+# 读取目标文件夹中的所有文件内容并生成摘要
+def read_and_summarize_documents(folder_path):
+    documents = []
+    file_paths = []
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        if os.path.isfile(file_path):
+            if file_name.endswith(('.txt', '.md')):
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    content = file.read()
+                    summary = summarize_text(content)
+                    documents.append(summary)
+            elif file_name.endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                summary = summarize_image(file_path)
+                documents.append(summary)
+            file_paths.append(file_path)
+    return documents, file_paths
+
+# 使用大模型生成文本摘要
+def summarize_text(text):
+    summarized = summarizer(text, max_length=50, min_length=25, do_sample=False)
+    return summarized[0]['summary_text']
+
+# 使用大模型从图片中抽象出内容
+def summarize_image(image_path):
+    image = blip_processor(images=image_path, return_tensors="pt")
+    with torch.no_grad():
+        generated_ids = blip_model.generate(**image)
+    description = blip_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    return description
 
 # 将文档保存回文件
 def save_documents(file_path, documents):
@@ -82,7 +114,7 @@ def find_closest_docs_to_centroids(embeddings, centroids):
     return closest_docs
 
 # 打印聚类结果并保存索引
-def print_and_save_clusters(clustered_documents, closest_docs, documents, output_dir):
+def print_and_save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir):
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(documents)
     
@@ -101,8 +133,10 @@ def print_and_save_clusters(clustered_documents, closest_docs, documents, output
         os.makedirs(cluster_dir, exist_ok=True)
 
         with open(os.path.join(cluster_dir, "indices.txt"), 'w') as f:
-            for doc_index, doc in cluster_docs:
+            for doc_index, _ in cluster_docs:
                 f.write(f"{doc_index}\n")
+                # 复制文件到相应的聚类文件夹
+                shutil.copy(file_paths[doc_index], cluster_dir)
 
         print(f"Cluster {cluster_index} (Representative words: {', '.join(top_words)}):")
         for doc_index, doc in cluster_docs:
@@ -119,40 +153,53 @@ def view_clusters(clustered_documents, documents):
 
 # 主函数
 def main():
-    file_path = 'documents.txt'
-    documents = read_documents(file_path)
+    folder_path = 'target_folder'  # 目标文件夹路径
+    output_dir = 'clustered_documents'  # 输出文件夹路径
+    documents_file = 'documents.txt'  # 存储摘要的文档文件
+
+    documents, file_paths = read_and_summarize_documents(folder_path)
+    save_documents(documents_file, documents)  # 保存摘要到文档文件
     num_clusters = 5  # 初始聚类数量
     similarity_threshold = 0.4  # 相似度阈值
 
     embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)
     closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-    print_and_save_clusters(clustered_documents, closest_docs, documents, "clustered_documents")
+    print_and_save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
 
     while True:
         command = input("Enter command (add/del/upd/view/exit): ").strip().lower()
 
         if command == "add":
-            new_doc = input("Enter new document: ").strip()
-            documents.append(new_doc)
-            save_documents(file_path, documents)
+            new_doc_path = input("Enter path to new document: ").strip()
+            if os.path.isfile(new_doc_path):
+                if new_doc_path.endswith(('.txt', '.md')):
+                    with open(new_doc_path, 'r', encoding='utf-8') as file:
+                        new_doc_content = file.read()
+                        new_doc_summary = summarize_text(new_doc_content)
+                elif new_doc_path.endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                    new_doc_summary = summarize_image(new_doc_path)
+                documents.append(new_doc_summary)
+                file_paths.append(new_doc_path)
+                save_documents(documents_file, documents)  # 保存摘要到文档文件
 
-            document_embeddings = np.vstack([document_embeddings, embedding_model.encode([new_doc])])
-            document_embeddings, cluster_centers, clustered_documents = update_clustering(documents, document_embeddings, embedding_model, cluster_centers, clustered_documents, similarity_threshold)
-            closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-            print_and_save_clusters(clustered_documents, closest_docs, documents, "clustered_documents")
+                document_embeddings = np.vstack([document_embeddings, embedding_model.encode([new_doc_summary])])
+                document_embeddings, cluster_centers, clustered_documents = update_clustering(documents, document_embeddings, embedding_model, cluster_centers, clustered_documents, similarity_threshold)
+                closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
+                print_and_save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
         
         elif command == "del":
             try:
                 del_index = int(input("Enter index of document to delete: ").strip())
                 if 0 <= del_index < len(documents):
                     documents.pop(del_index)
-                    save_documents(file_path, documents)
+                    file_paths.pop(del_index)
+                    save_documents(documents_file, documents)  # 保存摘要到文档文件
 
                     # 重新聚类
                     num_clusters = len(clustered_documents)
                     embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)
                     closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-                    print_and_save_clusters(clustered_documents, closest_docs, documents, "clustered_documents")
+                    print_and_save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
                 else:
                     print("Invalid index.")
             except ValueError:
@@ -162,15 +209,23 @@ def main():
             try:
                 upd_index = int(input("Enter index of document to update: ").strip())
                 if 0 <= upd_index < len(documents):
-                    new_content = input("Enter new content: ").strip()
-                    documents[upd_index] = new_content
-                    save_documents(file_path, documents)
+                    new_doc_path = input("Enter path to new document: ").strip()
+                    if os.path.isfile(new_doc_path):
+                        if new_doc_path.endswith(('.txt', '.md')):
+                            with open(new_doc_path, 'r', encoding='utf-8') as file:
+                                new_doc_content = file.read()
+                                new_doc_summary = summarize_text(new_doc_content)
+                        elif new_doc_path.endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                            new_doc_summary = summarize_image(new_doc_path)
+                        documents[upd_index] = new_doc_summary
+                        file_paths[upd_index] = new_doc_path
+                        save_documents(documents_file, documents)  # 保存摘要到文档文件
 
-                    # 重新聚类
-                    num_clusters = len(clustered_documents)
-                    embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)
-                    closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-                    print_and_save_clusters(clustered_documents, closest_docs, documents, "clustered_documents")
+                        # 重新聚类
+                        num_clusters = len(clustered_documents)
+                        embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)
+                        closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
+                        print_and_save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
                 else:
                     print("Invalid index.")
             except ValueError:
@@ -183,7 +238,7 @@ def main():
             break
 
         else:
-            print("Unknown command. Please enter add/del/upd/view/exit.")
+            print("Unknown command. Please enter 'add', 'del', 'upd', 'view', or 'exit'.")
 
 if __name__ == "__main__":
     main()

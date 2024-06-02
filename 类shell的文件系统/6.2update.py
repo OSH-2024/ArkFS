@@ -114,7 +114,7 @@ def find_closest_docs_to_centroids(embeddings, centroids):
     return closest_docs
 
 # 打印聚类结果并保存索引
-def print_and_save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir):
+def print_and_save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir, depth=1, max_depth=3):
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(documents)
     
@@ -138,18 +138,33 @@ def print_and_save_clusters(clustered_documents, closest_docs, documents, file_p
                 # 复制文件到相应的聚类文件夹
                 shutil.copy(file_paths[doc_index], cluster_dir)
 
-        print(f"Cluster {cluster_index} (Representative words: {', '.join(top_words)}):")
+        print(f"Level {depth} Cluster {cluster_index} (Representative words: {', '.join(top_words)}):")
         for doc_index, doc in cluster_docs:
             print(f"  - {doc} (Index: {doc_index})")
         print()
 
-# 查看聚类结果
-def view_clusters(clustered_documents, documents):
+        # 如果还未达到最大深度，对该聚类内部文档进行进一步聚类
+        if depth < max_depth:
+            sub_documents = [documents[doc_index] for doc_index, _ in cluster_docs]
+            sub_file_paths = [file_paths[doc_index] for doc_index, _ in cluster_docs]
+            if len(sub_documents) > 1:  # 只有多个文档时才继续聚类
+                sub_embedding_model, sub_document_embeddings, sub_kmeans, sub_clustered_documents, sub_cluster_centers = initial_clustering(sub_documents, min(len(sub_documents), 5))  # 次级聚类数量不超过5
+                sub_closest_docs = find_closest_docs_to_centroids(sub_document_embeddings, sub_cluster_centers)
+                print_and_save_clusters(sub_clustered_documents, sub_closest_docs, sub_documents, sub_file_paths, cluster_dir, depth + 1, max_depth)
+
+# 查看聚类结果，支持多级聚类打印
+def view_clusters(clustered_documents, documents, depth=1, prefix=""):
     for cluster_index, cluster_docs in enumerate(clustered_documents):
-        print(f"Cluster {cluster_index}:")
+        print(f"{prefix}Level {depth} Cluster {cluster_index}:")
         for doc_index, doc in cluster_docs:
-            print(f"  - {doc} (Index: {doc_index})")
+            print(f"{prefix}  - {doc} (Index: {doc_index})")
         print()
+
+        # 如果有子聚类，递归打印子聚类
+        sub_documents = [documents[doc_index] for doc_index, _ in cluster_docs]
+        if len(sub_documents) > 1:
+            sub_embedding_model, sub_document_embeddings, sub_kmeans, sub_clustered_documents, sub_cluster_centers = initial_clustering(sub_documents, min(len(sub_documents), 5))  # 次级聚类数量不超过5
+            view_clusters(sub_clustered_documents, sub_documents, depth + 1, prefix + "——")
 
 # 主函数
 def main():
@@ -159,7 +174,7 @@ def main():
 
     documents, file_paths = read_and_summarize_documents(folder_path)
     save_documents(documents_file, documents)  # 保存摘要到文档文件
-    num_clusters = 2  # 初始聚类数量
+    num_clusters = 5  # 初始聚类数量
     similarity_threshold = 0.4  # 相似度阈值
 
     embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)

@@ -6,18 +6,18 @@ import numpy as np
 
 ray.init()
 
-if len(sys.argv) < 1:
+if len(sys.argv) < 2:
     vector_length: int = 16 # default value = 10
 else:
     vector_length: int = int(sys.argv[1])
-    if len(sys.argv[2]) < 2:
-        poly_mul_times: int = 100
-    else:
-        poly_mul_times: int = int(sys.argv[2])
-        if len(sys.argv[2]) < 3:
-            pc_num: int = 10
-        else:
-            pc_num: int = int(sys.argv[3])
+if len(sys.argv) < 3:
+    poly_mul_times: int = 100
+else:
+    poly_mul_times: int = int(sys.argv[2])
+if len(sys.argv) < 4:
+    pc_num: int = 10
+else:
+    pc_num: int = int(sys.argv[3])
 vector_size: int = 2 ** vector_length # 2^16-order polynomial
 
 node_task_num: int = poly_mul_times // pc_num

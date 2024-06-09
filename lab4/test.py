@@ -21,9 +21,13 @@ else:
 vector_size: int = 2 ** vector_length # 2^16-order polynomial
 
 node_task_num: int = poly_mul_times // pc_num
-
+# print(len(sys.argv))
+# print("vector_length: ", vector_length)
+# print("poly_mul_times: ", poly_mul_times)
+# print(pc_num)
 def FFT(p): # Fast Fourier Transform, p the polyminial
-    n = len(p)
+    # print(type(p))
+    n = int(len(p))
     if n == 1 :
         return p
     w = math.e ** (2 * math.pi * 1j / n)
@@ -31,14 +35,14 @@ def FFT(p): # Fast Fourier Transform, p the polyminial
     po = p[1::2]
     ye = FFT(pe)
     yo = FFT(po)
-    y = [0] * n
-    for i in range(n/2):
-        y[i] = ye[i] + w**i * yo[i]
-        y[i + n/2] = ye[i] - w**i * yo[i]
+    y = np.empty(n, dtype= complex)
+    for i in range(0, n // 2):
+        y[i] = ye[i] + np.multiply((w**i) , yo[i])
+        y[i + n // 2] = ye[i] - np.multiply((w**i) , yo[i])
     return y
 
 def IFFT(p): # Inverse Fast Fourier Transform, p the polyminial
-    n = len(p)
+    n = int(len(p))
     if n == 1 :
         return p
     w = math.e ** (-2 * math.pi * 1j / n)
@@ -46,10 +50,12 @@ def IFFT(p): # Inverse Fast Fourier Transform, p the polyminial
     po = p[1::2]
     ye = IFFT(pe)
     yo = IFFT(po)
-    y = [0] * n
-    for i in range(n/2):
-        y[i] = ye[i] + w**i * yo[i]
-        y[i + n/2] = ye[i] - w**i * yo[i]
+    y = np.empty(n, dtype= complex)
+    
+    for i in range(0, n // 2):
+        
+        y[i] = ye[i] + np.multiply((w**i) , yo[i])
+        y[i + n // 2] = ye[i] - np.multiply((w**i) , yo[i])
     return y
 
 
@@ -57,12 +63,13 @@ def IFFT(p): # Inverse Fast Fourier Transform, p the polyminial
 def polyminial_mul(p1, p2): # coeffs -> FFT, calculate and inverse the result by IFFT
     coeff1 = FFT(p1)
     coeff2 = FFT(p2)
-    coeff = [0] * vector_size * 2
-    for i in range (vector_size * 2):
-        coeff[i] = coeff1[i] * coeff2[i]
+    coeff = np.empty(vector_size * 2, dtype= complex)
+    
+    for i in range (len(coeff2)):
+        coeff[i] = np.multiply(coeff1[i] ,coeff2[i])
     res = IFFT(coeff)
     for i in range (vector_size * 2):
-        res[i] /= vector_size * 2
+        res[i] = np.divide(res[i] ,( vector_size * 2))
     return res
 
 
@@ -78,7 +85,10 @@ class Worker(object):
     def poly_init(self):
         vector = np.random.random(size = vector_size)
         print("Now we have a vector\n", vector)
-        return vector
+        res = np.empty(vector_size, dtype= complex)
+        for i in range(vector_size):
+            res[i] += vector[i]
+        return res
 
     # 计算 p^n
     def calculate(self, times):

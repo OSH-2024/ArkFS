@@ -7,7 +7,7 @@ import numpy as np
 ray.init()
 
 if len(sys.argv) < 2:
-    vector_length: int = 16 # default value = 10
+    vector_length: int = 8 # default value = 10
 else:
     vector_length: int = int(sys.argv[1])
 if len(sys.argv) < 3:
@@ -37,8 +37,8 @@ def FFT(p): # Fast Fourier Transform, p the polyminial
     yo = FFT(po)
     y = np.empty(n, dtype= complex)
     for i in range(0, n // 2):
-        y[i] = ye[i] + np.multiply((w**i) , yo[i])
-        y[i + n // 2] = ye[i] - np.multiply((w**i) , yo[i])
+        y[i] = ye[i] + (w**i) * yo[i]
+        y[i + n // 2] = ye[i] - w**i * yo[i]
     return y
 
 def IFFT(p): # Inverse Fast Fourier Transform, p the polyminial
@@ -54,8 +54,8 @@ def IFFT(p): # Inverse Fast Fourier Transform, p the polyminial
     
     for i in range(0, n // 2):
         
-        y[i] = ye[i] + np.multiply((w**i) , yo[i])
-        y[i + n // 2] = ye[i] - np.multiply((w**i) , yo[i])
+        y[i] = ye[i] + (w**i) * yo[i]
+        y[i + n // 2] = ye[i] - w**i * yo[i]
     return y
 
 
@@ -66,7 +66,7 @@ def polyminial_mul(p1, p2): # coeffs -> FFT, calculate and inverse the result by
     coeff = np.empty(vector_size * 2, dtype= complex)
     
     for i in range (len(coeff2)):
-        coeff[i] = np.multiply(coeff1[i] ,coeff2[i])
+        coeff[i] = coeff1[i] * coeff2[i]
     res = IFFT(coeff)
     for i in range (vector_size * 2):
         res[i] = np.divide(res[i] ,( vector_size * 2))

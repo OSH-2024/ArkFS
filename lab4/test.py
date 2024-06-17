@@ -11,20 +11,17 @@ if len(sys.argv) < 2:
 else:
     vector_length: int = int(sys.argv[1])
 if len(sys.argv) < 3:
-    poly_mul_times: int = 100
+    sample_num: int = 1000
 else:
-    poly_mul_times: int = int(sys.argv[2])
+    sample_num: int = int(sys.argv[2])
 if len(sys.argv) < 4:
     pc_num: int = 10
 else:
     pc_num: int = int(sys.argv[3])
 vector_size: int = 2 ** vector_length # 2^16-order polynomial
 
-node_task_num: int = poly_mul_times // pc_num
-# print(len(sys.argv))
-# print("vector_length: ", vector_length)
-# print("poly_mul_times: ", poly_mul_times)
-# print(pc_num)
+node_task_num: int = sample_num // pc_num
+
 def FFT(p): # Fast Fourier Transform, p the polyminial
     # print(type(p))
     n = int(len(p))
@@ -76,23 +73,27 @@ class Worker(object):
         self.size = vector_size
         self.poly = self.poly_init()
         self.res = self.poly.copy()
-        self.all_times = poly_mul_times
+        self.all_times = sample_num
 
     def poly_init(self):
-        vector = np.random.random(size = vector_size)
+        vector = np.random.randint(0, high = 10, size = vector_size, dtype= int)
         # print("Now we have a vector\n", vector)
         res = np.empty(vector_size, dtype= complex)
         for i in range(vector_size):
             res[i] += vector[i]
         return res
 
-    # 计算 p^n
+    # 计算 p^2
     def calculate(self, times):
         # print("I start doing my work.")
         cur_time = time.time()
-        task_res = self.poly.copy()
-        for k in range(times-1):
-            task_res = polyminial_mul(task_res, self.poly)
+        task_res = np.empty(vector_size * 2, dtype= complex)
+        for k in times: 
+            task = self.poly_init()
+            task_copy = task.copy()
+            task = polyminial_mul(task, task_copy)
+            for i in len(task):
+                task_res[i] += task[i]
         # print("I have finished my work, duration: ", time.time() - cur_time)
         return task_res
 
@@ -106,8 +107,9 @@ if __name__ == '__main__':
 
     result_list = ray.get(temps)
 
-    result = result_list[0]
+    result = np.empty(vector_size * 2, dtype= complex)
     for m in result_list:
-        result = polyminial_mul(result, m)
+        for i in len(m): 
+            result[i] += m[i] 
     # print("final vector: \n", result)
     print("total duration: ", time.time() - cur_time)

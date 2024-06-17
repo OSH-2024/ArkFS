@@ -7,7 +7,7 @@ import numpy as np
 ray.init()
 
 if len(sys.argv) < 2:
-    vector_length: int = 8 # default value = 10
+    vector_length: int = 16 # default value = 16
 else:
     vector_length: int = int(sys.argv[1])
 if len(sys.argv) < 3:
@@ -58,21 +58,17 @@ def IFFT(p): # Inverse Fast Fourier Transform, p the polyminial
         y[i + n // 2] = ye[i] - w**i * yo[i]
     return y
 
-
-
 def polyminial_mul(p1, p2): # coeffs -> FFT, calculate and inverse the result by IFFT
     coeff1 = FFT(p1)
     coeff2 = FFT(p2)
-    coeff = np.empty(vector_size * 2, dtype= complex)
+    coeff = np.empty(len(p1) * 2, dtype= complex)
     
     for i in range (len(coeff2)):
         coeff[i] = coeff1[i] * coeff2[i]
     res = IFFT(coeff)
-    for i in range (vector_size * 2):
-        res[i] = np.divide(res[i] ,( vector_size * 2))
+    for i in range (len(res)):
+        res[i] = np.divide(res[i] , len(res))
     return res
-
-
 
 @ray.remote
 class Worker(object):
@@ -84,7 +80,7 @@ class Worker(object):
 
     def poly_init(self):
         vector = np.random.random(size = vector_size)
-        print("Now we have a vector\n", vector)
+        # print("Now we have a vector\n", vector)
         res = np.empty(vector_size, dtype= complex)
         for i in range(vector_size):
             res[i] += vector[i]
@@ -113,5 +109,5 @@ if __name__ == '__main__':
     result = result_list[0]
     for m in result_list:
         result = polyminial_mul(result, m)
-    # print("final matrix: \n", result)
+    # print("final vector: \n", result)
     print("total duration: ", time.time() - cur_time)

@@ -111,11 +111,11 @@ class Worker(object):
     def calculate(self, times):
         cur_time = time.time()
         task_res = np.empty(vector_size * 2, dtype= complex)
-        for k in times: 
+        for k in range(times):  
             task = self.poly_init()
             task_copy = task.copy()
             task = polyminial_mul(task, task_copy)
-            for i in len(task):
+            for i in range(len(task)):
                 task_res[i] += task[i]
         return task_res
 
@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
     result = np.empty(vector_size * 2, dtype= complex)
     for m in result_list:
-        for i in len(m): 
+        for i in range(len(m)):  
             result[i] += m[i] 
     print("total duration: ", time.time() - cur_time)
 ```
@@ -188,3 +188,8 @@ To monitor and debug Ray, view the dashboard at
 * 输入`ray stop`命令结束测试
 
 #### 测试结果
+
+
+### 分布式部署
+
+#### 测试流程

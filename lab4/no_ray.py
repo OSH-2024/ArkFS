@@ -1,10 +1,7 @@
-import ray
 import time
 import sys
 import math
 import numpy as np
-
-ray.init()
 
 if len(sys.argv) < 2:
     vector_length: int = 16 # default value = 16
@@ -67,7 +64,6 @@ def polyminial_mul(p1, p2): # coeffs -> FFT, calculate and inverse the result by
         res[i] = np.divide(res[i] , len(res))
     return res
 
-@ray.remote
 class Worker(object):
     def __init__(self):
         self.size = vector_size
@@ -99,16 +95,14 @@ class Worker(object):
 
 if __name__ == '__main__':
     cur_time=time.time()
-    worker = Worker.remote()
+    worker = Worker.__init__
     temps=[]
     for i in range(pc_num):
-        temp = worker.calculate.remote(node_task_num)
+        temp = worker.calculate(node_task_num)
         temps.append(temp)
 
-    result_list = ray.get(temps)
-
     result = np.empty(vector_size * 2, dtype= complex)
-    for m in result_list:
+    for m in temps:
         for i in range(len(m)):  
             result[i] += m[i] 
     # print("final vector: \n", result)

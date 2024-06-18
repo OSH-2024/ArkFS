@@ -47,6 +47,7 @@ if len(sys.argv) < 4:
 else:
     pc_num: int = int(sys.argv[3])
 vector_size: int = 2 ** vector_length # 2^16-order polynomial
+
 node_task_num: int = sample_num // pc_num
 
 def FFT(p): # Fast Fourier Transform, p the polyminial
@@ -73,7 +74,8 @@ def IFFT(p): # Inverse Fast Fourier Transform, p the polyminial
     po = p[1::2]
     ye = IFFT(pe)
     yo = IFFT(po)
-    y = np.empty(n, dtype= complex) 
+    y = np.empty(n, dtype= complex)
+    
     for i in range(0, n // 2):
         
         y[i] = ye[i] + (w**i) * yo[i]
@@ -110,13 +112,18 @@ class Worker(object):
     # 计算 p^2
     def calculate(self, times):
         cur_time = time.time()
-        task_res = np.empty(vector_size * 2, dtype= complex)
-        for k in range(times):  
+        task_res = []
+        square_sum = np.empty(vector_size * 2, dtype= complex)
+        sum = np.empty(vector_size, dtype= int)
+        for k in range(times): 
             task = self.poly_init()
             task_copy = task.copy()
+            for i in range(len(task)):
+                sum[i] += task[i]
             task = polyminial_mul(task, task_copy)
             for i in range(len(task)):
-                task_res[i] += task[i]
+                square_sum[i] += task[i]
+        task_res.append(sum, square_sum)
         return task_res
 
 if __name__ == '__main__':
@@ -129,10 +136,21 @@ if __name__ == '__main__':
 
     result_list = ray.get(temps)
 
-    result = np.empty(vector_size * 2, dtype= complex)
+    rsquare_sum = np.empty(vector_size * 2, dtype= complex)
+    rsum = np.empty(vector_size * 2, dtype= complex)
+    result = 0
     for m in result_list:
-        for i in range(len(m)):  
-            result[i] += m[i] 
+        for i in range(len(m[0])):  
+            rsum[i] += m[0][i] 
+        for i in range(len(m[1])):  
+            rsquare_sum[i] += m[1][i] 
+            result += m[1][i] * (10 ** i)
+    result /= sample_num
+    ex = 0
+    for i in range(len(rsum)):  
+        ex += rsum[i] 
+    ex /= sample_num
+    result -= ex ** 2
     print("total duration: ", time.time() - cur_time)
 ```
 
@@ -188,7 +206,11 @@ To monitor and debug Ray, view the dashboard at
 * 输入`ray stop`命令结束测试
 
 #### 测试结果
-
+测试结果截图见result.md
+| 总吞吐量 | pc_num = 1 | pc_num = 10 | pc_num = 100 | pc_num = 1000 | pc_num = 10000 | pc_num = 50000 |
+|-------|-------|-------|-------|-------|-------|-------|
+| 100000 |  |  |||||
+| 500000 |  |  |||||
 
 ### 分布式部署
 

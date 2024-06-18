@@ -83,13 +83,18 @@ class Worker(object):
     def calculate(self, times):
         # print("I start doing my work.")
         cur_time = time.time()
-        task_res = np.empty(vector_size * 2, dtype= complex)
+        task_res = []
+        square_sum = np.empty(vector_size * 2, dtype= complex)
+        sum = np.empty(vector_size, dtype= int)
         for k in range(times): 
             task = self.poly_init()
             task_copy = task.copy()
+            for i in range(len(task)):
+                sum[i] += task[i]
             task = polyminial_mul(task, task_copy)
             for i in range(len(task)):
-                task_res[i] += task[i]
+                square_sum[i] += task[i]
+        task_res.append(sum, square_sum)
         # print("I have finished my work, duration: ", time.time() - cur_time)
         return task_res
 
@@ -101,9 +106,20 @@ if __name__ == '__main__':
         temp = worker.calculate(node_task_num)
         temps.append(temp)
 
-    result = np.empty(vector_size * 2, dtype= complex)
+    rsquare_sum = np.empty(vector_size * 2, dtype= complex)
+    rsum = np.empty(vector_size * 2, dtype= complex)
+    result = 0
     for m in temps:
-        for i in range(len(m)):  
-            result[i] += m[i] 
+        for i in range(len(m[0])):  
+            rsum[i] += m[0][i] 
+        for i in range(len(m[1])):  
+            rsquare_sum[i] += m[1][i] 
+            result += m[1][i] * (10 ** i)
+    result /= sample_num
+    ex = 0
+    for i in range(len(rsum)):  
+        ex += rsum[i] 
+    ex /= sample_num
+    result -= ex ** 2
     # print("final vector: \n", result)
     print("total duration: ", time.time() - cur_time)

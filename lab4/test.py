@@ -78,10 +78,7 @@ class Worker(object):
     def poly_init(self):
         vector = np.random.randint(0, high = 10, size = vector_size, dtype= int)
         # print("Now we have a vector\n", vector)
-        res = np.empty(vector_size, dtype= complex)
-        for i in range(vector_size):
-            res[i] += vector[i]
-        return res
+        return vector
 
     # 计算 p^2
     def calculate(self, times):
@@ -92,13 +89,16 @@ class Worker(object):
         sum = np.empty(vector_size, dtype= int)
         for k in range(times): 
             task = self.poly_init()
-            task_copy = task.copy()
+            c_task = np.empty(vector_size, dtype= complex)
             for i in range(len(task)):
+                c_task[i] += task[i]
                 sum[i] += task[i]
-            task = polyminial_mul(task, task_copy)
-            for i in range(len(task)):
-                square_sum[i] += task[i]
-        task_res.append(sum, square_sum)
+            task_copy = c_task.copy()
+            c_task = polyminial_mul(c_task, task_copy)
+            for i in range(len(c_task)):
+                square_sum[i] += c_task[i]
+        task_res.append(sum) 
+        task_res.append(square_sum)
         # print("I have finished my work, duration: ", time.time() - cur_time)
         return task_res
 

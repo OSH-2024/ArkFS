@@ -15,7 +15,7 @@ if len(sys.argv) < 3:
 else:
     sample_num: int = int(sys.argv[2])
 if len(sys.argv) < 4:
-    pc_num: int = 10
+    pc_num: int = 50000
 else:
     pc_num: int = int(sys.argv[3])
 vector_size: int = 2 ** vector_length # 2^16-order polynomial

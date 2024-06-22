@@ -239,3 +239,48 @@ To monitor and debug Ray, view the dashboard at
 ### 分布式部署
 
 #### 测试流程
+
+* 按照以下步骤安装Ray: 
+
+    - 安装python: 
+
+    ```
+    sudo apt-get install python
+    ```
+
+    - 使用包管理器安装pip:
+    ```
+    sudo apt update
+    sudo apt install python3-pip
+    ```
+
+    如果你希望手动安装最新版本的 pip, 可以使用官方提供的 get-pip.py 脚本。以下是安装步骤: 
+    ```
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py # 使用 curl, 或者使用 wget 方法
+    wget https://bootstrap.pypa.io/get-pip.py               # 使用 wget
+    sudo python3 get-pip.py   # 对于 Python 3
+    sudo python get-pip.py    # 对于 Python 2
+    ```
+
+    最后使用`pip --version`命令验证是否安装成功
+
+    - 安装Ray
+    ```
+    pip install -U ray
+    pip install 'ray[default]'
+    ```
+
+* 在主节点使用 `ray start --head --port=6379 --include-dashboard=true --dashboard-host=0.0.0.0 --dashboard-port=8265` 命令创建 `head` 节点, 此时会出现以下信息:
+```
+    To monitor and debug Ray, view the dashboard at 
+        127.0.0.1:8265
+    To add another node to this Ray cluster, run
+        ray start --address='192.168.112.242:6379'
+```
+在浏览器中输入该ip地址，即可打开Dashboard查看运行结果。
+
+* 根据主节点处出现的信息，在从节点使用 `ray start --address='192.168.112.242:6379'` 命令加入 Ray 集群
+
+* 如果测试程序命名为 `test.py` 且位于当前工作目录下, 使用`python test.py` 或 `python3 test.py`命令运行测试程序
+
+* 输入`ray stop`命令结束测试

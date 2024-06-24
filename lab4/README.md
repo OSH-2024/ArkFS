@@ -238,6 +238,20 @@ To monitor and debug Ray, view the dashboard at
 
 ### 分布式部署
 
+考虑到网络问题，Vlab虚拟机、Ubuntu 子系统、VMWare虚拟机之间无法通过 Ray 进行分布式部署，我们选择在3台VMWare虚拟机上进行后续的实验。
+
+#### 实验环境
+
+Ray 的分布式部署要求所有机器的 Python 版本相同，经过一系列调整，最终实验环境配置如下。
+
+系统版本：Ubuntu 22.04
+
+Python版本: 3.10.12
+
+Numpy版本: 2.0.0
+
+
+
 #### 测试流程
 
 * 按照以下步骤安装Ray: 
@@ -284,6 +298,12 @@ To monitor and debug Ray, view the dashboard at
 * 如果测试程序命名为 `test.py` 且位于当前工作目录下, 使用`python test.py` 或 `python3 test.py`命令运行测试程序
 
 * 输入`ray stop`命令结束测试
+
+#### 运行截图
+
+![Alt pic](./src/joblist.png "工作历史记录")
+
+![Alt pic](./src/joblist.png "机器工作状态")
 
 #### 测试结果
 

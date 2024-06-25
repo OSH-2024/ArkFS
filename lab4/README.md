@@ -21,7 +21,7 @@
 
 ### 实验简介
 
-在本次实验中，我们小组选择了Ray进行部署，基于FFT算法实现了多项式乘法计算，并使用该程序完成了Ray的测试、分析、评价等工作。该实验报告已在CSDN上发表，链接https://blog.csdn.net/qq_60865812/article/details/139971832?csdn_share_tail=%7B%22type%22%3A%22blog%22%2C%22rType%22%3A%22article%22%2C%22rId%22%3A%22139971832%22%2C%22source%22%3A%22qq_60865812%22%7D
+在本次实验中，我们小组选择了Ray进行部署，基于FFT算法实现了多项式乘法计算，并使用该程序完成了Ray的测试、分析、评价等工作。该实验报告已在CSDN上发表，其链接为https://blog.csdn.net/qq_60865812/article/details/139971832?spm=1001.2014.3001.5501
 
 ### 测试任务
 

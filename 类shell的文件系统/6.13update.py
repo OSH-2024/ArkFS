@@ -168,6 +168,7 @@ def view_clusters(clustered_documents, documents, depth=1, prefix=""):
             sub_embedding_model, sub_document_embeddings, sub_kmeans, sub_clustered_documents, sub_cluster_centers = initial_clustering(sub_documents, min(len(sub_documents), 5))  # 次级聚类数量不超过5
             view_clusters(sub_clustered_documents, sub_documents, depth + 1, prefix + "——")
 
+
 # 主函数
 def main():
     folder_path = 'target_folder'  # 目标文件夹路径

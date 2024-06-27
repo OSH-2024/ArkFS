@@ -116,7 +116,7 @@ def find_closest_docs_to_centroids(embeddings, centroids):
     return closest_docs
 
 # 打印和保存多层聚类结果
-def save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir, depth=1, max_depth=3):
+def save_clusters(original_indices, clustered_documents, closest_docs, documents, file_paths, output_dir, depth=1, max_depth=3):
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(documents)
     
@@ -136,32 +136,49 @@ def save_clusters(clustered_documents, closest_docs, documents, file_paths, outp
 
         with open(os.path.join(cluster_dir, "indices.txt"), 'w') as f:
             for doc_index, _ in cluster_docs:
-                f.write(f"{doc_index}\n")
+                original_index = original_indices[doc_index]
+                f.write(f"{original_index}\n")
                 # 复制文件到相应的聚类文件夹
                 shutil.copy(file_paths[doc_index], cluster_dir)
+
+        print(f"Level {depth} Cluster {cluster_index} (Representative words: {', '.join(top_words)}):")
+        for doc_index, doc in cluster_docs:
+            original_index = original_indices[doc_index]
+            print(f"  - {doc} (Original Index: {original_index})")
+        print()
 
         # 如果还未达到最大深度，对该聚类内部文档进行进一步聚类
         if depth < max_depth:
             sub_documents = [documents[doc_index] for doc_index, _ in cluster_docs]
             sub_file_paths = [file_paths[doc_index] for doc_index, _ in cluster_docs]
+            sub_original_indices = [original_indices[doc_index] for doc_index, _ in cluster_docs]  # 传递对应的原始索引
             if len(sub_documents) > 1:  # 只有多个文档时才继续聚类
                 sub_embedding_model, sub_document_embeddings, sub_kmeans, sub_clustered_documents, sub_cluster_centers = initial_clustering(sub_documents, min(len(sub_documents), 5))  # 次级聚类数量不超过5
                 sub_closest_docs = find_closest_docs_to_centroids(sub_document_embeddings, sub_cluster_centers)
-                save_clusters(sub_clustered_documents, sub_closest_docs, sub_documents, sub_file_paths, cluster_dir, depth + 1, max_depth)
+                save_clusters(sub_original_indices, sub_clustered_documents, sub_closest_docs, sub_documents, sub_file_paths, cluster_dir, depth + 1, max_depth)
 
 # 查看多层聚类结果，支持多级聚类打印
 def view_clusters(clustered_documents, documents, original_indices, depth=1, prefix=""):
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(documents)
+    
     for cluster_index, cluster_docs in enumerate(clustered_documents):
-        print(f"{prefix}Level {depth} Cluster {cluster_index}:")
+        sub_documents = [documents[doc_index] for doc_index, _ in cluster_docs]
+        sub_X = vectorizer.transform(sub_documents)
+        tfidf_scores = np.asarray(sub_X.mean(axis=0)).flatten()
+        top_word_indices = np.argsort(tfidf_scores)[-3:][::-1]  # 取分数最高的三个词
+        top_words = [vectorizer.get_feature_names_out()[index] for index in top_word_indices]
+        representative_words = ", ".join(map(str, top_words))
+
+        print(f"{prefix}Level {depth} Cluster {cluster_index} (Representative words: {representative_words}):")
         for doc_index, doc in cluster_docs:
             original_index = original_indices[doc_index]  # 使用原始索引
             print(f"{prefix}  - {doc} (Original Index: {original_index})")
         print()
 
         # 如果有子聚类，递归打印子聚类
-        sub_documents = [documents[doc_index] for doc_index, _ in cluster_docs]
-        sub_original_indices = [original_indices[doc_index] for doc_index, _ in cluster_docs]  # 提取对应的原始索引
         if len(sub_documents) > 1:
+            sub_original_indices = [original_indices[doc_index] for doc_index, _ in cluster_docs]  # 提取对应的原始索引
             sub_embedding_model, sub_document_embeddings, sub_kmeans, sub_clustered_documents, sub_cluster_centers = initial_clustering(sub_documents, min(len(sub_documents), 5))  # 次级聚类数量不超过5
             view_clusters(sub_clustered_documents, sub_documents, sub_original_indices, depth + 1, prefix + "——")
 
@@ -177,12 +194,10 @@ def main():
     similarity_threshold = 0.4  # 相似度阈值
 
     embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)
-    
     closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-    # 在第一次调用view_clusters时，创建一个与documents等长的索引列表
     original_indices = list(range(len(documents)))
-    view_clusters(clustered_documents, documents, original_indices)
-    save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
+    
+    save_clusters(original_indices, clustered_documents, closest_docs, documents, file_paths, output_dir)
 
     while True:
         command = input("Enter command (add/del/upd/view/exit): ").strip().lower()
@@ -203,7 +218,7 @@ def main():
                 document_embeddings = np.vstack([document_embeddings, embedding_model.encode([new_doc_summary])])
                 document_embeddings, cluster_centers, clustered_documents = update_clustering(documents, document_embeddings, embedding_model, cluster_centers, clustered_documents, similarity_threshold)
                 closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-                save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
+                save_clusters(original_indices, clustered_documents, closest_docs, documents, file_paths, output_dir)
 
         elif command == "del":
             try:
@@ -217,7 +232,8 @@ def main():
                     num_clusters = len(clustered_documents)
                     embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)
                     closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-                    save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
+                    save_clusters(original_indices, clustered_documents, closest_docs, documents, file_paths, output_dir)
+
                 else:
                     print("Invalid index.")
             except ValueError:
@@ -243,7 +259,8 @@ def main():
                         num_clusters = len(clustered_documents)
                         embedding_model, document_embeddings, kmeans, clustered_documents, cluster_centers = initial_clustering(documents, num_clusters)
                         closest_docs = find_closest_docs_to_centroids(document_embeddings, cluster_centers)
-                        save_clusters(clustered_documents, closest_docs, documents, file_paths, output_dir)
+                        save_clusters(original_indices, clustered_documents, closest_docs, documents, file_paths, output_dir)
+
                 else:
                     print("Invalid index.")
             except ValueError:

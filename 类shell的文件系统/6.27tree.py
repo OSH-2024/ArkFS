@@ -16,30 +16,43 @@ class TreeNode:
 def build_forest(data):
     lines = data.strip().split("\n")
     forest = []
-    node_stack = []  # Stack to keep track of the current tree node
+    current_tree = None
+    current_node = None
+    parent_nodes = []
 
     for line in lines:
-        indent_level = (len(line) - len(line.lstrip())) // 2
-        if line.startswith("Level"):
+        if line.startswith("Level 1"):
             representative_words = line.split("(Representative words: ")[1].split(")")[0].split(", ")
             new_node = TreeNode(representative_words)
-            if indent_level == 0:
-                if node_stack:
-                    forest.append(node_stack[0])  # Add the root of the current tree to the forest
-                node_stack = [new_node]
-            else:
-                while len(node_stack) > indent_level:
-                    node_stack.pop()
-                node_stack[-1].add_child(new_node)
-                node_stack.append(new_node)
+            if current_tree:
+                forest.append(current_tree)
+            current_tree = new_node
+            current_node = new_node
+            parent_nodes = [new_node]
+        elif line.startswith("Level 2"):
+            representative_words = line.split("(Representative words: ")[1].split(")")[0].split(", ")
+            new_node = TreeNode(representative_words)
+            parent_nodes[-1].add_child(new_node)
+            current_node = new_node
+            parent_nodes.append(new_node)
         elif line.startswith("  -"):
             index = int(line.split("(Index: ")[1].split(")")[0])
-            representative_words = [line.split("- ")[1].split(" (Index: ")[0]]
-            new_node = TreeNode(representative_words, index)
-            node_stack[-1].add_child(new_node)
+            new_node = TreeNode([], index)
+            current_node.add_child(new_node)
+        else:
+            if line.startswith("Level"):
+                # Handle deeper levels if necessary
+                level = int(line.split(" ")[1])
+                representative_words = line.split("(Representative words: ")[1].split(")")[0].split(", ")
+                new_node = TreeNode(representative_words)
+                while len(parent_nodes) >= level:
+                    parent_nodes.pop()
+                parent_nodes[-1].add_child(new_node)
+                current_node = new_node
+                parent_nodes.append(new_node)
 
-    if node_stack:
-        forest.append(node_stack[0])  # Add the last tree root to the forest
+    if current_tree:
+        forest.append(current_tree)
 
     return forest
 

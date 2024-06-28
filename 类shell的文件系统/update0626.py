@@ -234,6 +234,8 @@ def main():
     
     save_clusters(original_indices, clustered_documents, closest_docs, documents, file_paths, output_dir)
 
+    ret=ret_clusters(clustered_documents, documents, original_indices)
+    print(ret)
     while True:
         command = input("Enter command (add/del/upd/view/exit): ").strip().lower()
 

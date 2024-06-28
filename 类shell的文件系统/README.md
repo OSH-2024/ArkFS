@@ -34,3 +34,10 @@
 ## 6.27-bug修复-李岱峰
 
 我修复了view和save的bug，目前每层输出都为全局index，并且有打印representative word。
+
+## 6.28-ret添加-李岱峰
+
+我添加了
+![通用返回接口](./src/通用返回接口.png)
+这是ret_clusters函数的返回值，其他人可以使用这个进行操作。
+

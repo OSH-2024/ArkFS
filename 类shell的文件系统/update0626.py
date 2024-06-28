@@ -182,6 +182,41 @@ def view_clusters(clustered_documents, documents, original_indices, depth=1, pre
             sub_embedding_model, sub_document_embeddings, sub_kmeans, sub_clustered_documents, sub_cluster_centers = initial_clustering(sub_documents, min(len(sub_documents), 5))  # 次级聚类数量不超过5
             view_clusters(sub_clustered_documents, sub_documents, sub_original_indices, depth + 1, prefix + "——")
 
+
+##########################################
+def get_clusters(clustered_documents, documents, original_indices, depth=1, prefix=""):
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(documents)
+    
+    result = []
+
+    for cluster_index, cluster_docs in enumerate(clustered_documents):
+        sub_documents = [documents[doc_index] for doc_index, _ in cluster_docs]
+        sub_X = vectorizer.transform(sub_documents)
+        tfidf_scores = np.asarray(sub_X.mean(axis=0)).flatten()
+        top_word_indices = np.argsort(tfidf_scores)[-3:][::-1]  # 取分数最高的三个词
+        top_words = [vectorizer.get_feature_names_out()[index] for index in top_word_indices]
+        representative_words = ", ".join(map(str, top_words))
+
+        cluster_info = [depth, top_words, [original_indices[doc_index] for doc_index, _ in cluster_docs]]
+        result.append(cluster_info)
+
+        # 如果有子聚类，递归计算子聚类
+        if len(sub_documents) > 1:
+            sub_original_indices = [original_indices[doc_index] for doc_index, _ in cluster_docs]  # 提取对应的原始索引
+            sub_embedding_model, sub_document_embeddings, sub_kmeans, sub_clustered_documents, sub_cluster_centers = initial_clustering(sub_documents, min(len(sub_documents), 5))  # 次级聚类数量不超过5
+            sub_result = get_clusters(sub_clustered_documents, sub_documents, sub_original_indices, depth + 1, prefix + "——")
+            if sub_result:
+                result.extend(sub_result)
+    
+    return result
+
+# 返回多层聚类结果
+def ret_clusters(clustered_documents, documents, original_indices):
+    return get_clusters(clustered_documents, documents, original_indices)
+
+############################################################
+
 # 主函数
 def main():
     folder_path = 'target_folder'  # 目标文件夹路径

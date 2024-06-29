@@ -69,6 +69,12 @@ class CharacterTree:
     def update(self, data):
         self.destroy()
         self.build_tree(data)
+
+    def first_level_words(self):
+        chars = []
+        for node in self.root.children:
+            chars.append(node.representative_words)
+        return chars
     
     
             
@@ -92,3 +98,4 @@ data = [[1, ['diagram', 'the', 'of'],
 CTree = CharacterTree()
 CTree.build_tree(data)
 CTree.traverse()
+print(CTree.first_level_words())

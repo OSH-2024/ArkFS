@@ -15,10 +15,10 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
 # 文件目录
-file_dir = r"//home//fengli-osh//osh//file_system_resembling_shell//target_folder"
+file_dir = r"C:\\programming\\codefile\\newgit\\osh\\LabelMatching\\target_folder"
 
 # 新文件夹路径
-output_dir = r"//home//fengli-osh//osh//file_system_resembling_shell//target_folder"
+output_dir = "C:\\programming\\codefile\\newgit\\osh\\LabelMatching\\target_folder"
 os.makedirs(output_dir, exist_ok=True)
 
 # 初始化特征列表、文件路径列表和文件信息列表
@@ -89,6 +89,12 @@ def search_files(query, k=5):
 
 # 主循环进行查询
 while True:
+    """"""
+    
+    """"""
+    #print()
+    #function()
+    
     query = input("输入查询语句（或输入 'exit' 退出）: ")
     if query.lower() == 'exit':
         break

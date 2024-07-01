@@ -4,7 +4,6 @@ import clip
 from PIL import Image
 import numpy as np
 import faiss
-import json
 from datetime import datetime
 
 # 设置环境变量以允许重复的 OpenMP 库
@@ -14,11 +13,12 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
-# 文件目录
-file_dir = "E:\Codefield\CODE_C\Git\ArkFS\file_system_resembling_shell\target_folder"
+# 获取当前工作目录
+current_dir = os.getcwd()
 
-# 新文件夹路径
-output_dir = os.path.join(file_dir, "..", "processed_data")
+# 文件目录和新文件夹路径
+file_dir = os.path.join(current_dir, "target_folder")
+output_dir = os.path.join(current_dir, "target_folder")
 os.makedirs(output_dir, exist_ok=True)
 
 # 初始化特征列表、文件路径列表和文件信息列表
@@ -37,24 +37,11 @@ for fname in os.listdir(file_dir):
                 feature = model.encode_image(image)
                 features.append(feature.cpu().numpy())
                 file_paths.append(file_path)
-        # elif fname.lower().endswith('.txt'):
-        #     # 处理文本文件（如果需要的话）
-        #     with open(file_path, 'r') as f:
-        #         text = f.read().strip()
-        #     text_input = clip.tokenize([text]).to(device)
-        #     with torch.no_grad():
-        #         feature = model.encode_text(text_input)
-        #     features.append(feature.cpu().numpy())
-        #     file_paths.append(file_path)
         
         # 记录文件信息：文件路径、最后修改时间、文件名
         file_stat = os.stat(file_path)
         modified_time = datetime.fromtimestamp(file_stat.st_mtime).isoformat()
-        file_info.append({
-            "file_path": file_path,
-            "modified_time": modified_time,
-            "file_name": fname
-        })
+        file_info.append(f"{file_path}\t{modified_time}\t{fname}")
 
     except Exception as e:
         print(f"Error processing file {file_path}: {e}")
@@ -68,14 +55,17 @@ index = faiss.IndexFlatIP(features.shape[1])
 index.add(features)
 
 # 保存特征向量和文件信息到文件
-output_file = os.path.join(output_dir, "processed_data.json")
-with open(output_file, 'w') as f:
-    json.dump({
-        "features": features.tolist(),
-        "file_info": file_info
-    }, f, indent=4)
+output_file = os.path.join(output_dir, "processed_data.txt")
+np.savetxt(output_file, features, delimiter='\t')
+
+# 保存文件信息到文本文件
+file_info_output = os.path.join(output_dir, "file_info.txt")
+with open(file_info_output, 'w') as f:
+    for info in file_info:
+        f.write(info + '\n')
 
 print(f"Processed data saved to: {output_file}")
+print(f"File info saved to: {file_info_output}")
 
 # 定义文件搜索函数
 def search_files(query, k=5):
@@ -89,12 +79,6 @@ def search_files(query, k=5):
 
 # 主循环进行查询
 while True:
-    """"""
-    
-    """"""
-    #print()
-    #function()
-    
     query = input("输入查询语句（或输入 'exit' 退出）: ")
     if query.lower() == 'exit':
         break

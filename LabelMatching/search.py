@@ -11,7 +11,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
 # 文件目录
-file_dir = r"E:\\Codefield\\CODE_C\\Git\ArkFS\\file_system_resembling_shell\\target_folder"
+file_dir = r"//home//fengli-osh//osh//file_system_resembling_shell//target_folder"
 
 
 # 初始化特征列表和文件路径列表

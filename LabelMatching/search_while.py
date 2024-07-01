@@ -12,7 +12,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
 # Directory containing the files
-file_dir = r"E:\\Codefield\\CODE_C\\Git\ArkFS\\file_system_resembling_shell\\target_folder"
+file_dir = r"C:\programming\codefile\newgit\osh\file_system_resembling_shell\target_folder"
 
 # Initialize lists for features and file paths
 features = []
@@ -22,22 +22,22 @@ file_paths = []
 for fname in os.listdir(file_dir):
     file_path = os.path.join(file_dir, fname)
     try:
-     if fname.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-        # Process image files
-        image = preprocess(Image.open(file_path)).unsqueeze(0).to(device)
-        with torch.no_grad():
-            feature = model.encode_image(image)
+        if fname.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+            # Process image files
+            image = preprocess(Image.open(file_path)).unsqueeze(0).to(device)
+            with torch.no_grad():
+                feature = model.encode_image(image)
             features.append(feature.cpu().numpy())
             file_paths.append(file_path)
-     # elif fname.lower().endswith('.txt'):
-     #     # Process text files (if needed)
-     #     with open(file_path, 'r') as f:
-     #         text = f.read().strip()
-     #     text_input = clip.tokenize([text]).to(device)
-     #     with torch.no_grad():
-     #         feature = model.encode_text(text_input)
-     #     features.append(feature.cpu().numpy())
-     #     file_paths.append(file_path)
+        # elif fname.lower().endswith('.txt'):
+        #     # Process text files (if needed)
+        #     with open(file_path, 'r') as f:
+        #         text = f.read().strip()
+        #     text_input = clip.tokenize([text]).to(device)
+        #     with torch.no_grad():
+        #         feature = model.encode_text(text_input)
+        #     features.append(feature.cpu().numpy())
+        #     file_paths.append(file_path)
     except Exception as e:
         print(f"Error processing file {file_path}: {e}")
 
@@ -55,7 +55,7 @@ def search_files(query, k=5):
     with torch.no_grad():
         query_feature = model.encode_text(query_input).cpu().numpy()
     query_feature /= np.linalg.norm(query_feature)
-
+    
     D, I = index.search(query_feature, k)
     return [(file_paths[i], D[0][j]) for j, i in enumerate(I[0])]
 

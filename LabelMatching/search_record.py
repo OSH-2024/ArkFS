@@ -15,10 +15,10 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
 # 文件目录
-file_dir = r"E:\\Codefield\\CODE_C\\Git\\ArkFS\\file_system_resembling_shell\\target_folder"
+file_dir = "E:\Codefield\CODE_C\Git\ArkFS\file_system_resembling_shell\target_folder"
 
 # 新文件夹路径
-output_dir = r"E:\\Codefield\\CODE_C\\Git\\ArkFS\\file_system_resembling_shell\\processed_data"
+output_dir = os.path.join(file_dir, "..", "processed_data")
 os.makedirs(output_dir, exist_ok=True)
 
 # 初始化特征列表、文件路径列表和文件信息列表

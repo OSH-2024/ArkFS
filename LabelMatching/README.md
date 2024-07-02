@@ -10,3 +10,12 @@ pip install SpeechRecognition pyaudio   语音处理包
 ## Search
 
 The latest version of file searching is in the `search` directory. The search is done using the `search.py` script. The script takes in a query and returns the most relevant files. And it is now able to search for a file using contents and time limit.
+
+
+## 上层返回向量--李岱峰
+
+支持精确搜索，支持模糊搜索，返回向量[[时间], [type], [文件内容或精确化文件名], [操作码]]
+操作码'增': '0', '删': '1', '改': '2', '查': '3','细': '4'。
+细是精确化搜索，此时的第三个参数就是精确的文件名。
+
+

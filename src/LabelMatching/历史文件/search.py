@@ -9,11 +9,11 @@ from transformers import XLMRobertaTokenizer, XLMRobertaModel
 from datetime import datetime
 
 def process_files_query(file_dir, image_features, text_features, image_paths, text_paths, file_info, query):
-    # 加载 CLIP 模型和预处理函数
+    # 加载 CLIP 模型
     device = "cuda" if torch.cuda.is_available() else "cpu"
     clip_model, clip_preprocess = clip.load("ViT-B/32", device=device)
 
-    # 加载 XLM-R 模型和分词器（用于文本处理）
+    # 加载 XLM-R 模型
     model_name = "xlm-roberta-base"
     tokenizer = XLMRobertaTokenizer.from_pretrained(model_name)
     xlm_model = XLMRobertaModel.from_pretrained(model_name).to(device)

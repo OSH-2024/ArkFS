@@ -3,7 +3,9 @@ from openai import OpenAI
 import time
 import ast
 import re
-from speak_to_text import recognize_speech_from_mic
+from speak_to_text import recognize_speech_from_mic, map_relative_time_to_iso
+from datetime import datetime, timedelta
+
 
 def convert_string_to_list(input_str):
     # 使用正则表达式找到所有中括号中的内容
@@ -66,6 +68,8 @@ def get_value(user_input):
 def standard(user_input):
     extracted_=get_value(user_input)
     valid_words = ['增', '删', '改', '查']  # 有效的词语列表
+    print(extracted_)
+    extracted_[0] = map_relative_time_to_iso(extracted_[0])
 
     # 检查第四个参数是否只包含有效的词语
     if all(word in valid_words for word in extracted_[3]):

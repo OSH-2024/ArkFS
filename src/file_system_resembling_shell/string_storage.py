@@ -3,28 +3,29 @@ import os
 import numpy as np
 import queue
 
+
 class Trie_tree:
     def __init__(self):
         self.matrix = np.zeros((500, 26), dtype=int)
         self.count = np.zeros(500, dtype=int)
         self.nextp = np.zeros(500, dtype=int)
+        self.nodenum = 0
 
     def insert(self, target): #AC自动机初始化
         index = 0
         for ch in target:
-            # print(index)
             ch_value = ord(ch) - ord('a')
-            # print(self.matrix[index][ch_value])
+            # print(index, ch_value)
             if self.matrix[index][ch_value] == 0:
-                ch_value = index
-                index += 1
+                self.matrix[index][ch_value] = self.nodenum
+                self.nodenum += 1
             index = self.matrix[index][ch_value]
         self.count[index] += 1
     
     def build(self):
         q = queue.Queue()
         for i in range(0, 26):
-            if self.matrix[0][i]:
+            if self.matrix[0][i] != 0:
                 q.put(self.matrix[0][i])
         while q.empty() == False:
             element = q.get()
@@ -40,6 +41,10 @@ class Trie_tree:
         for target in targets:
             self.insert(target)
         self.build()
+        # for i in range(50):
+        #     for j in range(26):
+        #         if self.matrix[i][j] != 0:
+        #             print(i, j)
         
 
 def string_divide(target_names, ch):
@@ -63,13 +68,14 @@ def query(target_tree, file_name):
     flist = string_divide(flist, '.')
     flist = string_divide(flist, '_')
     for fname in flist:
-        for i in fname:
-            j = ord(i) - ord('a')
+        # print(fname)
+        for k in fname:
+            j = ord(k) - ord('a')
             if j < 0:
                 break
             pointer = target_tree.matrix[pointer][j]
-            print(pointer, j)
-            while j and target_tree.count[j] != 0:
+            j = pointer
+            while j > 0 and target_tree.count[j] != 0:
                 result += target_tree.count[j]
                 j = target_tree.nextp[j]
     
@@ -102,6 +108,7 @@ def main():
             file_list.append(file_path)
     results = string_matching(target_name, file_list)
     print(results)
+
 
 if __name__ == "__main__":
     main()

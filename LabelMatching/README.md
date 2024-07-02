@@ -4,3 +4,6 @@ This directory contains the code for the label matching experiments. An notewort
 
 sudo apt-get update
 sudo apt-get install python3-tk
+
+
+pip install SpeechRecognition pyaudio   语音处理包

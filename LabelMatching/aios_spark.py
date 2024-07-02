@@ -101,7 +101,8 @@ def parse_operations(param):
         '增': '0',
         '删': '1',
         '改': '2',
-        '查': '3'
+        '查': '3',
+        '细': '4'
     }
     
     # 提取参数中的操作符号，并按照出现顺序组成数字序列
@@ -113,11 +114,36 @@ def parse_operations(param):
     result_str = ''.join(result)
     return result_str
 
+#####精确搜索，正则表达式匹配
+def is_precise_search(prompt):
+    """
+    Determine if the search is a precise search based on the input prompt.
+
+    Parameters:
+        prompt (str): User input prompt.
+
+    Returns:
+        tuple: A boolean indicating if it is a precise search, and the extracted file name.
+    """
+    precise_patterns = [r'叫(.*?)的文件', r'名为(.*?)的文件']
+    for pattern in precise_patterns:
+        match = re.search(pattern, prompt)
+        if match:
+            return True, match.group(1).strip()
+    return False, None
+
 def input_user():
-    print("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。输入'退出'以结束程序。")
+    print("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。输入'退出'以结束程序。精确化搜索请使用“叫xxx的文件”或“名为xxx的文件”格式。")
     
     user_input=recognize_speech_from_mic()
 
+    is_precise, file_name = is_precise_search(user_input)
+    if is_precise:
+        print("精确搜索确认")
+        print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}], ['4']]")
+        return [['NULL'], ['NULL'], [file_name], ['4']]
+
+    
     if user_input.strip().lower() == '退出':
         print("程序结束。")
 

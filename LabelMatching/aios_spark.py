@@ -74,7 +74,6 @@ def standard(user_input):
     # 检查第四个参数是否只包含有效的词语
     if all(word in valid_words for word in extracted_[3]):
         extracted_[3]=parse_operations(extracted_[3])
-        return extracted_
     else:
         if '查删增' in extracted_[3]:
             extracted_[3] = '查增删'
@@ -90,8 +89,11 @@ def standard(user_input):
 
 
         extracted_[3]=parse_operations(extracted_[3])
-        return extracted_
-    
+        
+    if extracted_[1] == 'NULL' and extracted_[2] == 'NULL' and extracted_[3][1] == '查' and extracted_[3][2] == '增' and extracted_[0]==('NULL', 'NULL') :
+        extracted_[2] = user_input
+        
+    return extracted_
 
 def parse_operations(param):
     # 可能包含的操作符号映射

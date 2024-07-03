@@ -2,27 +2,46 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 
+selected_files = []
+confirm_button = None  # 全局变量存储确定按钮
+
+# 清除UI上的所有内容
+def clear():
+    global confirm_button
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+    if confirm_button:
+        confirm_button.pack_forget()  # 隐藏确定按钮
+        confirm_button = None
+    update_scroll_region()
+
+# 在UI上打印参数内容
+def display(content):
+    # 计算新内容应该添加到哪一行
+    current_row = len(result_frame.grid_slaves(column=0))  # 获取当前有多少行
+    content_label = tk.Label(result_frame, text=str(content), anchor='w', justify='left')
+    content_label.grid(row=current_row, column=0, padx=10, pady=10, sticky='w')
+    update_scroll_region()
+
 # 定义搜索功能
 def search():
     search_query = search_entry.get()
     print(f"搜索内容: {search_query}")
     # 在此处可以添加实际搜索逻辑
-    for widget in result_frame.winfo_children():
-        widget.destroy()
+    clear()
 
 # 通过终端输入路径
 def input_paths():
     file_paths = input("请输入文件的绝对路径，以逗号分隔: ").split(',')
-    for widget in result_frame.winfo_children():
-        widget.destroy()
-    row = 0
+    row = len(result_frame.grid_slaves(column=0))  # 获取当前有多少行
     for file_path in file_paths:
-        display_file(file_path.strip(), row)
+        display_file(file_path.strip(), row, 1)
         row += 1
     update_scroll_region()
 
 # 显示文件信息和缩略图
-def display_file(file_path, row):
+def display_file(file_path, row, show_checkbox=0):
+    global confirm_button
     if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
         # 显示图片缩略图
         try:
@@ -38,10 +57,25 @@ def display_file(file_path, row):
     path_label = tk.Label(result_frame, text=file_path, anchor='w', justify='left')
     path_label.grid(row=row, column=1, padx=10, pady=10, sticky='w')
 
+    if show_checkbox:
+        var = tk.IntVar()
+        checkbox = tk.Checkbutton(result_frame, variable=var)
+        checkbox.grid(row=row, column=2, padx=10, pady=10)
+        selected_files.append((file_path, var))
+        
+        if confirm_button is None:
+            confirm_button = tk.Button(root, text="确定", command=confirm_selection)
+            confirm_button.pack(side="bottom", pady=10)
+
 # 更新滚动区域
 def update_scroll_region():
     result_frame.update_idletasks()
     result_canvas.config(scrollregion=result_canvas.bbox("all"))
+
+# 确定按钮功能
+def confirm_selection():
+    selected_list = [file_path for file_path, var in selected_files if var.get() == 1]
+    print("Selected files:", selected_list)
 
 # 创建主窗口
 root = tk.Tk()
@@ -61,6 +95,18 @@ search_entry.pack(side='left', fill='x', expand=True, padx=10)
 # 搜索按钮
 search_button = tk.Button(search_frame, text="搜索", command=search)
 search_button.pack(side='left', padx=10)
+
+# 清除按钮
+clear_button = tk.Button(search_frame, text="清除", command=clear)
+clear_button.pack(side='left', padx=10)
+
+# 显示按钮（用于测试display函数）
+display_button = tk.Button(search_frame, text="显示内容", command=lambda: display("测试内容"))
+display_button.pack(side='left', padx=10)
+
+# 输入路径按钮
+input_paths_button = tk.Button(search_frame, text="输入路径", command=input_paths)
+input_paths_button.pack(side='left', padx=10)
 
 # 创建Canvas和滚动条
 result_canvas = tk.Canvas(root)
@@ -82,6 +128,4 @@ def on_mouse_wheel(event):
 result_canvas.bind("<MouseWheel>", on_mouse_wheel)
 
 # 运行主循环
-root.after(100, input_paths)  # 在主循环开始后调用input_paths函数
-
 root.mainloop()

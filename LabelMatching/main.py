@@ -47,11 +47,14 @@ def search():
     #display(get_v)
     #start Yang Bingquan
     if (get_v[3][0] == '3' or get_v[3][0] == '4') and len(get_v[3]) == 1:
+        print("select 1")
         tqueue = task_queue.task_queue(get_v)
         filelist = tqueue.execute()
+        print(filelist)
         clear()
         input_paths(filelist, 0)
     elif get_v[3][0] == '3':
+        print("select 2")
         get_v1 = get_v.copy()
         get_v2 = get_v.copy()
         get_v1[3] = "3"

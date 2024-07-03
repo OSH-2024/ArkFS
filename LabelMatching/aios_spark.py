@@ -71,8 +71,8 @@ def standard(user_input):
     print(extracted_)
     extracted_[0] = map_relative_time_to_iso(extracted_[0])
 
-    if '查' not in extracted_[3]:
-        extracted_[3] = '查' + extracted_[3]
+    #if '查' not in extracted_[3]:
+    #    extracted_[3] = '查' + extracted_[3]
 
     # 检查第四个参数是否只包含有效的词语
     if all(word in valid_words for word in extracted_[3]):
@@ -92,7 +92,8 @@ def standard(user_input):
         
     if extracted_[1] == 'NULL' and extracted_[2] == 'NULL' and extracted_[3][0] == '3'  and extracted_[0]==('NULL', 'NULL') :
         extracted_[2] = user_input
-        
+    
+    extracted_[2] = [extracted_[2], ""]
     return extracted_
 
 def parse_operations(param):
@@ -140,8 +141,8 @@ def input_user():
     is_precise, file_name = is_precise_search(user_input)
     if is_precise:
         print("精确搜索确认")
-        print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}], ['4']]")
-        return [['NULL'], ['NULL'], [file_name], ['4']]
+        print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}," "], ['4']]")
+        return [['NULL'], ['NULL'], [file_name,""], ['4']]
 
     
     if user_input.strip().lower() == '退出':

@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 import os  # 导入os模块
-
+import aios_spark as aios
+import task_queue
 selected_files = []
 confirm_button = None  # Global variable to store the confirm button
 
@@ -26,10 +27,21 @@ def display(content):
 
 # Define search functionality
 def search():
-    search_query = search_entry.get()
-    print(f"Search content: {search_query}")
-    # Add actual search logic here
+    user_input = search_entry.get()
     clear()
+    display("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。")
+    display("精确化搜索请使用“叫xxx的文件”或“名为xxx的文件”格式。")
+    #start Li Daifeng
+    is_precise, file_name = aios.is_precise_search(user_input)
+    if is_precise:
+        display("精确搜索确认")
+        #print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}," "], ['4']]")
+        get_v = [['NULL'], ['NULL'], [file_name,""], ['4']]
+
+    get_v=aios.standard(user_input)
+    #end Li Daifeng
+    display(get_v)
+    # Add actual search logic here
 
 # Input file paths via terminal
 def input_paths():
@@ -116,24 +128,24 @@ search_entry = tk.Entry(search_frame)
 search_entry.pack(side='left', fill='x', expand=True, padx=10)
 
 # Search button
-search_button = tk.Button(search_frame, text="Search", command=search)
+search_button = tk.Button(search_frame, text="搜索", command=search)
 search_button.pack(side='left', padx=10)
 
 # Clear button
-clear_button = tk.Button(search_frame, text="Clear", command=clear)
-clear_button.pack(side='left', padx=10)
+#clear_button = tk.Button(search_frame, text="Clear", command=clear)
+#clear_button.pack(side='left', padx=10)
 
 # Display button (for testing display function)
-display_button = tk.Button(search_frame, text="Display Content", command=lambda: display("Test Content"))
-display_button.pack(side='left', padx=10)
+#display_button = tk.Button(search_frame, text="Display Content", command=lambda: display("Test Content"))
+#display_button.pack(side='left', padx=10)
 
 # Input paths button
-input_paths_button = tk.Button(search_frame, text="Input Paths", command=input_paths)
-input_paths_button.pack(side='left', padx=10)
+#input_paths_button = tk.Button(search_frame, text="Input Paths", command=input_paths)
+#input_paths_button.pack(side='left', padx=10)
 
 # Remove last row button
-remove_last_row_button = tk.Button(search_frame, text="Remove Last Row", command=remove_last_row)
-remove_last_row_button.pack(side='left', padx=10)
+#remove_last_row_button = tk.Button(search_frame, text="Remove Last Row", command=remove_last_row)
+#remove_last_row_button.pack(side='left', padx=10)
 
 # Create Canvas and scrollbar
 result_canvas = tk.Canvas(root)

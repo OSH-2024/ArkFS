@@ -41,7 +41,7 @@ def process_input(prompt):
             {
                 "role": "user",
                 "content": (
-                    f'"{prompt}",对于这句话请提取他的“时间(昨天、前天或其他)”“文件类型(仅包含image或者txt)”“有关文件内容的一个名词(阳光、草地或其他)”，如果有缺失的信息，用NULL表示。现在你有“增、删、改、查”四种文件功能(对于任务调度你只能返回“增、删、改、查”这四个字的组合作为任务序列)，请你给出这句话对应的任务调度序列，如“增删”这样的序列，如果不涉及具体动作，只查即可，但如果有“移动”“转移”“放置”之类的要求，你就需要添加增删改查的其他功能。按照顺序，以[[时间],[文件类型],[内容名词],[调度序列]]的格式返回给我。'
+                    f'"{prompt}",对于这句话请提取他的“时间(昨天、前天或其他)”“文件类型(仅包含image或者txt)”“有关文件内容的一个名词(阳光、草地或人名等其他名词)”，如果有缺失的信息，用NULL表示。现在你有“增、删、改、查”四种文件功能(对于任务调度你只能返回“增、删、改、查”这四个字的组合作为任务序列)，请你给出这句话对应的任务调度序列，如“增删”这样的序列，如果不涉及具体动作，只查即可，但如果有“移动”“转移”“放置”之类的要求，你就需要添加增删改查的其他功能。按照顺序，以[[时间],[文件类型],[内容名词],[调度序列]]的格式返回给我。'
                 )
             }
         ]
@@ -58,12 +58,14 @@ def get_value(user_input):
         extracted_info = process_input(user_input)
 
         if extracted_info == ['None', 'None', 'None','None']:
-            print("输入有误，请重新输入。")
+            #print("输入有误，请重新输入。")
+            return None
         else: 
             #print(f"提取的信息: {extracted_info}")
             return extracted_info
     except Exception as e:
-        print(f"发生错误: {e}")
+        #print(f"发生错误: {e}")
+        return None
         
 def standard(user_input):
     extracted_=get_value(user_input)
@@ -71,8 +73,10 @@ def standard(user_input):
     print(extracted_)
     extracted_[0] = map_relative_time_to_iso(extracted_[0])
 
-    if '查' not in extracted_[3]:
-        extracted_[3] = '查' + extracted_[3]
+    #if '查' not in extracted_[3]:
+    #    extracted_[3] = '查' + extracted_[3]
+
+    #if extracted_[3] == '改':
 
     # 检查第四个参数是否只包含有效的词语
     if all(word in valid_words for word in extracted_[3]):
@@ -80,8 +84,7 @@ def standard(user_input):
     else:
         if '查删增' in extracted_[3]:
             extracted_[3] = '查增删'
-        
-        if  '剪切' in extracted_[3]:
+        elif  '剪切' in extracted_[3]:
             extracted_[3] = '查增删'
         elif '复制' in extracted_[3]:
             extracted_[3] = '查增'
@@ -92,7 +95,8 @@ def standard(user_input):
         
     if extracted_[1] == 'NULL' and extracted_[2] == 'NULL' and extracted_[3][0] == '3'  and extracted_[0]==('NULL', 'NULL') :
         extracted_[2] = user_input
-        
+    
+    extracted_[2] = [extracted_[2], ""]
     return extracted_
 
 def parse_operations(param):
@@ -100,7 +104,7 @@ def parse_operations(param):
     operation_mapping = {
         '增': '0',
         '删': '1',
-        '改': '2',
+        '改': '3',
         '查': '3',
         '细': '4'
     }
@@ -140,8 +144,8 @@ def input_user():
     is_precise, file_name = is_precise_search(user_input)
     if is_precise:
         print("精确搜索确认")
-        print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}], ['4']]")
-        return [['NULL'], ['NULL'], [file_name], ['4']]
+        print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}," "], ['4']]")
+        return [['NULL'], ['NULL'], [file_name,""], ['4']]
 
     
     if user_input.strip().lower() == '退出':
@@ -156,4 +160,4 @@ def input_user():
         input_user()
 
 
-input_user()
+#input_user()

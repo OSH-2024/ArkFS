@@ -12,7 +12,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
 # Directory containing the files
-file_dir = r"C:\programming\codefile\newgit\osh\file_system_resembling_shell\target_folder"
+file_dir = "C:\\programming\\codefile\\newgit\\osh\\file_system_resembling_shell\\target_folder"
 
 # Initialize lists for features and file paths
 features = []

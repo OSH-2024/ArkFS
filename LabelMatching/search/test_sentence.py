@@ -7,7 +7,7 @@ import faiss
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 # 假设有一些文本文件在 'documents/' 目录中
-document_dir = 'E:\\Codefield\\CODE_C\\Git\\ArkFS\\src\\file_system_resembling_shell\\target_folder'
+document_dir = "E:\\Codefield\\CODE_C\\Git\\ArkFS\\src\\file_system_resembling_shell\\target_folder"
 
 # 读取所有文本文件
 documents = []
@@ -49,7 +49,7 @@ def search(query, top_k=5):
     return results
 
 # 示例查询
-query = "EQ"
+query = "草"
 results = search(query)
 
 print("搜索结果：")

@@ -72,15 +72,7 @@ def process_files_query(file_dir, query):
     text_index = faiss.IndexFlatIP(text_features.shape[1]) if text_features.size > 0 else None
     if text_index:
         text_index.add(text_features)
-
-    output_dir = os.path.join(file_dir, "..", "processed_data")
-    os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, "processed_data.json")
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump({
-            "file_info": file_info
-        }, f, indent=4, ensure_ascii=False)
-
+        
     query_input = clip.tokenize([query]).to(device)
     with torch.no_grad():
         query_feature_clip = clip_model.encode_text(query_input).cpu().numpy()
@@ -136,11 +128,35 @@ def search_files(image_index, text_index, image_paths, text_paths, file_info, qu
 
     return filtered_results["image_results"], filtered_results["text_results"]
 
-def my_search(modified_time, content, target_folder):
-    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-    image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm = process_files_query(target_folder, content)
+def simple_search(modified_time, target_folder):
+    image_results = []
+    text_results = []
     modified_time_start = modified_time[0] or None
     modified_time_end = modified_time[1] or None
-    image_results, text_results = search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm, modified_time_start, modified_time_end, k=10)
+    for root, _, files in os.walk(target_folder):
+        for fname in files:
+            if(fname.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))):
+                if (not modified_time_start or datetime.fromisoformat(modified_time) >= datetime.fromisoformat(modified_time_start)) and \
+                (not modified_time_end or datetime.fromisoformat(modified_time) <= datetime.fromisoformat(modified_time_end)):
+                    image_results.append(os.path.join(root, fname))
+            elif(fname.lower().endswith('.txt')):
+                if (not modified_time_start or datetime.fromisoformat(modified_time) >= datetime.fromisoformat(modified_time_start)) and \
+                (not modified_time_end or datetime.fromisoformat(modified_time) <= datetime.fromisoformat(modified_time_end)):
+                    text_results.append(os.path.join(root, fname))
+    
+    image_results.append(len(image_results))
+    text_results.append(len(text_results))
+    return image_results, text_results
+                   
 
-    return image_results or None, text_results or None
+def my_search(modified_time, content, target_folder):
+    if not content:
+        image_results, text_results = simple_search(modified_time, target_folder)
+    else:
+        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+        image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm = process_files_query(target_folder, content)
+        modified_time_start = modified_time[0] or None
+        modified_time_end = modified_time[1] or None
+        image_results, text_results = search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm, modified_time_start, modified_time_end, k=10)
+
+    return image_results, text_results

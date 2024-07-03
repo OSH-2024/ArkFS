@@ -8,7 +8,8 @@ class task_queue:
         self.type = src[1]
         self.opcode = src[3]
         self.srcs = queue.LifoQueue()
-        self.srcs.put(src[2])
+        self.srcs.put(src[2][1])
+        self.srcs.put(src[2][0])
 
 
     def push(self, src):
@@ -25,11 +26,15 @@ class task_queue:
         state = 0
         for ch in self.opcode:
             ref = ord(ch) - ord('0')    # operation code
-            if ref == 0:    # delete
+            if ref == 0:    # append
+                src = []
+                src.append(self.pop())
+                src.append(self.pop())
+                src.append(self.type)
+                
+            elif ref == 1:  # delete
                 continue
-            elif ref == 1:  # modify
-                continue
-            elif ref == 2:  # append
+            elif ref == 2:  # modify
                 continue
             elif ref == 3:  # query
                 continue

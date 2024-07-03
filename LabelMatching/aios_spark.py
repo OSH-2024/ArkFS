@@ -56,7 +56,8 @@ def get_value(user_input):
     
     try:
         extracted_info = process_input(user_input)
-
+        #print(extracted_info)
+        
         if extracted_info == ['None', 'None', 'None','None']:
             #print("输入有误，请重新输入。")
             return None
@@ -70,7 +71,10 @@ def get_value(user_input):
 def standard(user_input):
     extracted_=get_value(user_input)
     valid_words = ['增', '删', '改', '查']  # 有效的词语列表
-    print(extracted_)
+    #print(extracted_)
+    while len(extracted_) != 4:
+        extracted_=get_value(user_input)
+
     extracted_[0] = map_relative_time_to_iso(extracted_[0])
 
     #if '查' not in extracted_[3]:

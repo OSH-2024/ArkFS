@@ -29,12 +29,14 @@ def recognize_speech_from_mic():
     # 将文本转换为字符串
     text_str = str(text)
 
-    # 检查是否包含“手动”
-    if "手动" in text_str:
-        text = input("请输入:")
-    else:
-        print(f"输入结果: {text_str}")
-
+#    # 检查是否包含“手动”
+#    if "手动" in text_str:
+#        text = input("请输入:")
+#    else:
+#        print(f"输入结果: {text_str}")
+#
+    print(f"输入结果: {text_str}")
+    
     return text
 
 

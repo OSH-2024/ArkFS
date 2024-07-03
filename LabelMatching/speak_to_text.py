@@ -23,8 +23,7 @@ def recognize_speech_from_mic():
         text = input("请输入:")
     except sr.RequestError as e:
         print("无法请求 Google Web Speech API; {0}".format(e))
-        print("手动输入")
-        text = input("请输入:")
+        
 
     # 将文本转换为字符串
     text_str = str(text)

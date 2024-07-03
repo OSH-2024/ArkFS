@@ -4,13 +4,16 @@ from PIL import Image, ImageTk
 import os  # 导入os模块
 import aios_spark as aios
 import task_queue
+import speech_recognition as sr
 selected_files = []
+sel_filelist = []
 confirm_button = None  # Global variable to store the confirm button
 
 # Clear all contents in the UI
 def clear():
     global confirm_button
     for widget in result_frame.winfo_children():
+        widget.grid_forget()
         widget.destroy()
     if confirm_button:
         confirm_button.pack_forget()  # Hide the confirm button
@@ -27,10 +30,11 @@ def display(content):
 
 # Define search functionality
 def search():
+    global sel_filelist
     user_input = search_entry.get()
     clear()
-    display("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。")
-    display("精确化搜索请使用“叫xxx的文件”或“名为xxx的文件”格式。")
+    #display("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。")
+    #display("精确化搜索请使用“叫xxx的文件”或“名为xxx的文件”格式。")
     #start Li Daifeng
     is_precise, file_name = aios.is_precise_search(user_input)
     if is_precise:
@@ -40,15 +44,94 @@ def search():
 
     get_v=aios.standard(user_input)
     #end Li Daifeng
-    display(get_v)
+    #display(get_v)
+    #start Yang Bingquan
+    if (get_v[3][0] == '3' or get_v[3][0] == '4') and len(get_v[3]) == 1:
+        tqueue = task_queue.task_queue(get_v)
+        filelist = tqueue.execute()
+        clear()
+        input_paths(filelist, 0)
+    elif get_v[3][0] == '3':
+        get_v1 = get_v.copy()
+        get_v2 = get_v.copy()
+        get_v1[3] = "3"
+        get_v2[3] = get_v[3][1:]
+        tqueue = task_queue.task_queue(get_v)
+        filelist = tqueue.execute()
+        clear()
+        input_paths(filelist, 1)
+        root.wait_variable(decision_made)
+        if decision_made.get() == "go":
+            clear()
+            decision_made.set("")
+        get_v2[2][0] = sel_filelist
+        tqueue1 = task_queue.task_queue(get_v2)
+        state = tqueue1.execute()
+        display(str(state))
+    else:
+        pass
+
+
+    #end Yang Bingquan
     # Add actual search logic here
 
+def recognize_speech_from_mic():
+    # 获取默认的麦克风
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()
+
+    # 从麦克风录音
+    with microphone as source:
+        clear()
+        display("请说话...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+    # 使用 Google Web Speech API 将音频转换为文本
+    try:
+        display("识别中...")
+        text = recognizer.recognize_google(audio, language='zh-CN')
+    except sr.UnknownValueError:
+        display("Speech无法理解音频")
+    except sr.RequestError as e:
+        display("无法请求 Google Web Speech API; {0}".format(e))
+        
+
+    # 将文本转换为字符串
+   # text_str = str(text)
+
+#    # 检查是否包含“手动”
+#    if "手动" in text_str:
+#        text = input("请输入:")
+#    else:
+#        print(f"输入结果: {text_str}")
+#
+    display("识别结束")
+    
+    return text
+
+def audio_search():
+    remove_last_row()
+    clear()
+    user_input=recognize_speech_from_mic()
+    search_entry.delete(0, tk.END)
+    search_entry.insert(0,user_input)
+
+    #start Li Daifeng
+    #is_precise, file_name = aios.is_precise_search(user_input)
+    #if is_precise:
+    #    display("精确搜索确认")
+    #    #print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}," "], ['4']]")
+    #    get_v = [['NULL'], ['NULL'], [file_name,""], ['4']]
+#
+    #get_v=aios.standard(user_input)
+    #end Li Daifeng
+
 # Input file paths via terminal
-def input_paths():
-    file_paths = input("Enter the absolute paths of files, separated by commas: ").split(',')
+def input_paths(file_paths, type):
     row = len(result_frame.grid_slaves(column=0))  # Get the current number of rows
     for file_path in file_paths:
-        display_file(file_path.strip(), row, 1)
+        display_file(file_path.strip(), row, type)
         row += 1
     update_scroll_region()
 
@@ -99,8 +182,10 @@ def update_scroll_region():
 
 # Confirm button functionality
 def confirm_selection():
+    global sel_filelist
     selected_list = [file_path for file_path, var in selected_files if var.get() == 1]
-    print("Selected files:", selected_list)
+    sel_filelist = selected_list
+    decision_made.set("go")
 
 # Remove the last row of the UI
 def remove_last_row():
@@ -132,8 +217,10 @@ search_button = tk.Button(search_frame, text="搜索", command=search)
 search_button.pack(side='left', padx=10)
 
 # Audio button
-audio_button = tk.Button(search_frame, text="语音输入", command=lambda x: x)
+audio_button = tk.Button(search_frame, text="语音输入", command=audio_search)
 audio_button.pack(side='left', padx=10)
+
+decision_made = tk.StringVar()
 # Clear button
 #clear_button = tk.Button(search_frame, text="Clear", command=clear)
 #clear_button.pack(side='left', padx=10)
@@ -169,5 +256,6 @@ def on_mouse_wheel(event):
 
 result_canvas.bind("<MouseWheel>", on_mouse_wheel)
 
+root.after(100, lambda: display("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。\n精确化搜索请使用“叫xxx的文件”或“名为xxx的文件”格式。"))
 # Run main loop
 root.mainloop()

@@ -6,7 +6,7 @@ from search.file_add import my_add
 from search.file_delete import my_delete
 from search.file_search import my_search
 
-index = "default"
+index = "/target_folder"
 
 class task_queue:
     def __init__(self, src) -> None:
@@ -65,6 +65,12 @@ class task_queue:
                     src.append(feature)
                 src.append(index)   # <- 演示目录
                 src_list = my_search(src)
+                results = []
+                for i in src_list:
+                    for j in i:
+                        results.append(j)
+                return results
+
 
 
             elif ref == 4:  # accurate query
@@ -76,12 +82,23 @@ class task_queue:
                         file_path = os.path.join(root, file)
                         file_list.append(file_path)
                 results = string_storage.string_matching(target_name, file_list)
-                if len(results) == 0:
-                    state = 4   # Error code "4": No file matching
-                    break
-                self.push(results)
+                # if len(results) == 0:
+                #     state = 4   # Error code "4": No file matching
+                #     break
+                return results
             else:
                 continue
             if state != 0:
                 break
         return state
+
+
+def main():
+    src = [['NULL','NULL'],'txt',[ "grass", index], "4"]
+    tqueue = task_queue(src)
+    results = tqueue.execute()
+    print(results)
+
+
+if __name__ == "__main__":
+    main()

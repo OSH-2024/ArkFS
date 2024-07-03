@@ -131,6 +131,9 @@ search_entry.pack(side='left', fill='x', expand=True, padx=10)
 search_button = tk.Button(search_frame, text="搜索", command=search)
 search_button.pack(side='left', padx=10)
 
+# Audio button
+audio_button = tk.Button(search_frame, text="语音输入", command=lambda x: x)
+audio_button.pack(side='left', padx=10)
 # Clear button
 #clear_button = tk.Button(search_frame, text="Clear", command=clear)
 #clear_button.pack(side='left', padx=10)

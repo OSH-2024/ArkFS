@@ -4,19 +4,25 @@ import shutil
 # opcode:[[origin],target_folder,file/dir,name]
 
 def my_add(opcode):
-    if not opcode[0]:
+    if len(opcode[0]) == 0:
         # Create a file or directory
         try:
             if opcode[2]:
                 # Create a directory
+                # Copy the directory to the target folder
+                if os.path.exists(os.path.join(opcode[1],opcode[3])):
+                    opcode[3] = opcode[3] + "(1)"
                 os.makedirs(os.path.join(opcode[1],opcode[3]))
             else:
                 # Create a file
+                if os.path.exists(os.path.join(opcode[1],opcode[3])):
+                    opcode[3] = opcode[3] + "(1)"
                 with open(os.path.join(opcode[1],opcode[3]),"w") as f:
                     f.write("Hello, World!\n")
+            return 0
         except Exception as e:
             print(f"Error: {e}")
-            return None
+            return 1
                     
     else:
         # Copy but not move
@@ -38,9 +44,10 @@ def my_add(opcode):
                     shutil.copy(address,os.path.join(opcode[1],name))
                 else:
                     pass
+            return 0
         except Exception as e:
             print(f"Error: {e}")
-            return None
+            return 1
                     
                     
             

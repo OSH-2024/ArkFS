@@ -143,8 +143,8 @@ def simple_search(modified_time, target_folder):
                 (not modified_time_end or datetime.fromisoformat(modified_time) <= datetime.fromisoformat(modified_time_end)):
                     text_results.append(os.path.join(root, fname))
     
-    image_results.append(len(image_results))
-    text_results.append(len(text_results))
+    # image_results.append(len(image_results))
+    # text_results.append(len(text_results))
     return image_results, text_results
                    
 # opcode = [modified_time, content, target_folder]

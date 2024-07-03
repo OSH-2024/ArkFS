@@ -58,12 +58,14 @@ def get_value(user_input):
         extracted_info = process_input(user_input)
 
         if extracted_info == ['None', 'None', 'None','None']:
-            print("输入有误，请重新输入。")
+            #print("输入有误，请重新输入。")
+            return None
         else: 
             #print(f"提取的信息: {extracted_info}")
             return extracted_info
     except Exception as e:
-        print(f"发生错误: {e}")
+        #print(f"发生错误: {e}")
+        return None
         
 def standard(user_input):
     extracted_=get_value(user_input)

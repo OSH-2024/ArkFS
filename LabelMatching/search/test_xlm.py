@@ -4,17 +4,17 @@ import faiss
 import os
 import numpy as np
 from PIL import Image
-from transformers import DebertaTokenizer, DebertaModel
+from transformers import XLMRobertaTokenizer, XLMRobertaModel
 from datetime import datetime
 
 def load_models(device):
     clip_model, clip_preprocess = clip.load("ViT-B/32", device=device)
-    model_name = "microsoft/deberta-base"
-    tokenizer = DebertaTokenizer.from_pretrained(model_name)
-    deberta_model = DebertaModel.from_pretrained(model_name).to(device)
-    return clip_model, clip_preprocess, tokenizer, deberta_model
+    model_name = "xlm-roberta-base"
+    tokenizer = XLMRobertaTokenizer.from_pretrained(model_name)
+    xlm_model = XLMRobertaModel.from_pretrained(model_name).to(device)
+    return clip_model, clip_preprocess, tokenizer, xlm_model
 
-def process_file(file_path, clip_model, clip_preprocess, tokenizer, deberta_model, image_features, text_features, image_paths, text_paths, file_info, device):
+def process_file(file_path, clip_model, clip_preprocess, tokenizer, xlm_model, image_features, text_features, image_paths, text_paths, file_info, device):
     try:
         if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
             image = clip_preprocess(Image.open(file_path)).unsqueeze(0).to(device)
@@ -27,7 +27,7 @@ def process_file(file_path, clip_model, clip_preprocess, tokenizer, deberta_mode
                 text = f.read().strip()
             inputs = tokenizer(text, return_tensors="pt", max_length=512, truncation=True, padding=True).to(device)
             with torch.no_grad():
-                outputs = deberta_model(**inputs)
+                outputs = xlm_model(**inputs)
             feature = outputs.last_hidden_state.mean(dim=1)
             text_features.append(feature.cpu().numpy())
             text_paths.append(file_path)
@@ -44,7 +44,7 @@ def process_file(file_path, clip_model, clip_preprocess, tokenizer, deberta_mode
 
 def process_files_query(file_dir, query):
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    clip_model, clip_preprocess, tokenizer, deberta_model = load_models(device)
+    clip_model, clip_preprocess, tokenizer, xlm_model = load_models(device)
 
     image_features = []
     text_features = []
@@ -54,7 +54,7 @@ def process_files_query(file_dir, query):
 
     for root, _, files in os.walk(file_dir):
         for fname in files:
-            process_file(os.path.join(root, fname), clip_model, clip_preprocess, tokenizer, deberta_model, image_features, text_features, image_paths, text_paths, file_info, device)
+            process_file(os.path.join(root, fname), clip_model, clip_preprocess, tokenizer, xlm_model, image_features, text_features, image_paths, text_paths, file_info, device)
 
     image_features = np.vstack(image_features) if image_features else np.array([])
     if image_features.size > 0:
@@ -79,11 +79,11 @@ def process_files_query(file_dir, query):
 
     inputs = tokenizer(query, return_tensors="pt", max_length=512, truncation=True, padding=True).to(device)
     with torch.no_grad():
-        outputs = deberta_model(**inputs)
-    query_feature_deberta = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
-    query_feature_deberta /= np.linalg.norm(query_feature_deberta)
+        outputs = xlm_model(**inputs)
+    query_feature_xlm = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
+    query_feature_xlm /= np.linalg.norm(query_feature_xlm)
 
-    return image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta
+    return image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm
 
 def search_images(image_index, image_paths, query_feature, k=5):
     if not image_index:
@@ -97,9 +97,9 @@ def search_texts(text_index, text_paths, query_feature, k=5):
     D, I = text_index.search(query_feature, k)
     return [(text_paths[i], D[0][j]) for j, i in enumerate(I[0])]
 
-def search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta, modified_time_start=None, modified_time_end=None, k=5):
+def search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm, modified_time_start=None, modified_time_end=None, k=5):
     image_results = search_images(image_index, image_paths, query_feature_clip, k)
-    text_results = search_texts(text_index, text_paths, query_feature_deberta, k)
+    text_results = search_texts(text_index, text_paths, query_feature_xlm, k)
 
     filtered_results = {
         "image_results": [],
@@ -119,7 +119,7 @@ def search_files(image_index, text_index, image_paths, text_paths, file_info, qu
         if info:
             modified_time = datetime.fromisoformat(info['modified_time'])
             if (not modified_time_start or modified_time >= datetime.fromisoformat(modified_time_start)) and \
-               (not modified_time_end or modified_time <= datetime.fromisoformat(modified_time_end)) and (score > 0.80):
+               (not modified_time_end or modified_time <= datetime.fromisoformat(modified_time_end)) and (score > 0.98):
                 filtered_results["text_results"].append(path)
 
     filtered_results["image_results"].append(len(filtered_results["image_results"]))
@@ -147,18 +147,15 @@ def simple_search(modified_time, target_folder):
     text_results.append(len(text_results))
     return image_results, text_results
                    
-# opcode = [modified_time, content, target_folder]
-def my_search(opcode):
-    modified_time = opcode[0]
-    content = opcode[1]
-    target_folder = opcode[2]
+
+def my_search(modified_time, content, target_folder):
     if not content:
         image_results, text_results = simple_search(modified_time, target_folder)
     else:
         os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-        image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta = process_files_query(target_folder, content)
+        image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm = process_files_query(target_folder, content)
         modified_time_start = modified_time[0] or None
         modified_time_end = modified_time[1] or None
-        image_results, text_results = search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta, modified_time_start, modified_time_end, k=10)
+        image_results, text_results = search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_xlm, modified_time_start, modified_time_end, k=10)
 
-    return [image_results, text_results]
+    return image_results, text_results

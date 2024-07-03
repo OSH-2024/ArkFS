@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 import os  # 导入os模块
-
+import aios_spark as aios
+import task_queue
 selected_files = []
 confirm_button = None  # Global variable to store the confirm button
 
@@ -26,10 +27,21 @@ def display(content):
 
 # Define search functionality
 def search():
-    search_query = search_entry.get()
-    print(f"Search content: {search_query}")
-    # Add actual search logic here
+    user_input = search_entry.get()
     clear()
+    display("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。")
+    display("精确化搜索请使用“叫xxx的文件”或“名为xxx的文件”格式。")
+    #start Li Daifeng
+    is_precise, file_name = aios.is_precise_search(user_input)
+    if is_precise:
+        display("精确搜索确认")
+        #print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}," "], ['4']]")
+        get_v = [['NULL'], ['NULL'], [file_name,""], ['4']]
+
+    get_v=aios.standard(user_input)
+    #end Li Daifeng
+    display(get_v)
+    # Add actual search logic here
 
 # Input file paths via terminal
 def input_paths():

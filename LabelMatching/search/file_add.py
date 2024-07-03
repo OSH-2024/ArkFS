@@ -13,7 +13,7 @@ def my_add(opcode):
             else:
                 # Create a file
                 with open(os.path.join(opcode[1],opcode[3]),"w") as f:
-                    pass
+                    f.write("Hello, World!\n")
         except Exception as e:
             print(f"Error: {e}")
             return None
@@ -33,9 +33,8 @@ def my_add(opcode):
                     # Find the name of the file
                     name = os.path.basename(address)
                     # Copy the file to the target folder
-                    if not os.exists(os.path.join(opcode[1],name)):
-                        with open(os.path.join(opcode[1],name),"w") as f:
-                            pass
+                    if os.path.exists(os.path.join(opcode[1],name)):
+                        name = name + "(1)"
                     shutil.copy(address,os.path.join(opcode[1],name))
                 else:
                     pass

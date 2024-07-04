@@ -167,5 +167,3 @@ def input_user():
     else:
         input_user()
 
-
-input_user()

@@ -6,7 +6,7 @@ from search.file_add import my_add
 from search.file_delete import my_delete
 from search.file_search import my_search
 
-index = "/target_folder"
+index = "D:\\arkfs\\LabelMatching\\target_folder"
 
 class task_queue:
     def __init__(self, src) -> None:

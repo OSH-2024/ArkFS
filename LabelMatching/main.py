@@ -40,7 +40,7 @@ def search():
     if is_precise:
         display("精确搜索确认")
         #print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}," "], ['4']]")
-        get_v = [['NULL'], ['NULL'], [file_name,""], ['4']]
+        get_v = [['NULL'], 'NULL', [file_name,""], '4']
     else:
         get_v=aios.standard(user_input)
     #end Li Daifeng

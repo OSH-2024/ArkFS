@@ -83,8 +83,8 @@ def standard(user_input):
     #if extracted_[3] == '改':
     if extracted_[3] == '':
         extracted_[3] = '查'
-    if extracted_[3] == '':
-        extracted_[3] = '查'
+#    if extracted_[3] == '':
+#        extracted_[3] = '查'
 
     # 检查第四个参数是否只包含有效的词语
     if all(word in valid_words for word in extracted_[3]):
@@ -98,6 +98,8 @@ def standard(user_input):
             extracted_[3] = '查增'
         elif '移动' in extracted_[3]:
             extracted_[3] = '查增删'
+        elif '查查' in extracted_[3]:
+            extracted_[3] = '查'
 
     extracted_[3]=parse_operations(extracted_[3])
         

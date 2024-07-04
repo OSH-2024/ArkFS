@@ -45,7 +45,7 @@ def search():
     else :
         get_v=aios.standard(user_input)
     #end Li Daifeng
-    #display(get_v)
+    print(get_v)
     #start Yang Bingquan
     if (get_v[3][0] == '3' or get_v[3][0] == '4') and len(get_v[3]) == 1:
         print("select 1")
@@ -72,8 +72,12 @@ def search():
         tqueue1 = task_queue.task_queue(get_v2)
         state = tqueue1.execute()
         display(str(state))
+        sel_filelist.clear()
     else:
-        pass
+        tqueue = task_queue.task_queue(get_v)
+        filelist = tqueue.execute()
+        clear()
+        display(f"状态码:{filelist}")
 
 
     #end Yang Bingquan

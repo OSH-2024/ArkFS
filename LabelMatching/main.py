@@ -70,13 +70,19 @@ def search():
         get_v2[2][0] = sel_filelist
         tqueue1 = task_queue.task_queue(get_v2)
         state = tqueue1.execute()
-        display(str(state))
+        if state == 0:
+            display("已完成")
+        else:
+            display("出错！请重试")
         sel_filelist.clear()
     else:
         tqueue = task_queue.task_queue(get_v)
         filelist = tqueue.execute()
         clear()
-        display(f"状态码:{filelist}")
+        if filelist == 0:
+            display("已完成")
+        else:
+            display("出错！请重试")
 
 
     #end Yang Bingquan
@@ -209,7 +215,7 @@ root = tk.Tk()
 root.title("File Display Interface")
 
 # Set window size
-root.geometry("800x600")
+root.geometry("1500x600")
 
 # Search frame for search box and buttons
 search_frame = tk.Frame(root)

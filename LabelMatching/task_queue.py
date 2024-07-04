@@ -13,6 +13,8 @@ class task_queue:
     def __init__(self, src) -> None:
         self.time = src[0]
         self.type = src[1]
+        if self.type == 'NULL':
+            self.type = ''
         self.opcode = src[3]
         self.srcs = queue.LifoQueue()
         self.srcs.put(src[2][1])
@@ -53,6 +55,7 @@ class task_queue:
                     src.append(0)
                 name = np.random.randint(0, 65535)
                 src.append(str(name) + self.type)
+                print(src)
                 state = my_add(src) # Error code
                 self.push(drain)
 

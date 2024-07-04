@@ -46,7 +46,10 @@ class task_queue:
                 src.append(drain)
                 target_folder = self.pop()
                 if len(target_folder) == 0:
-                    src.append(index + "/target_folder")
+                    if len(self.type) == 0:
+                        src.append(index +"/default")
+                    else:
+                        src.append(index + "/target_folder")
                 else:
                     src.append(target_folder)   # <- 演示目录
                 if len(self.type) == 0:
@@ -54,8 +57,10 @@ class task_queue:
                 else:
                     src.append(0)
                 name = np.random.randint(0, 65535)
-                src.append(str(name) + self.type)
-                print(src)
+                if len(self.type) == 0:
+                    src.append(str(name))
+                else:
+                    src.append(str(name) +"." +self.type)
                 state = my_add(src) # Error code
                 self.push(drain)
 
@@ -120,7 +125,7 @@ class task_queue:
 def main():
     # print(index)
     # src = [['NULL','NULL'],'txt',[ [index + "/task_queue.py"], ""], "0"]
-    src = [['NULL','NULL'],'txt',[ "ui", ""], "4"]
+    src = [['NULL','NULL'],'',[ [], ""], "0"]
     tqueue = task_queue(src)
     # tqueue.show()
     results = tqueue.execute()

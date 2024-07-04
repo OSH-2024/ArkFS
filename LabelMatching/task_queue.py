@@ -6,7 +6,8 @@ from search.file_add import my_add
 from search.file_delete import my_delete
 from search.file_search import my_search
 
-index = "D:\\arkfs\\LabelMatching\\target_folder"
+# index = "D:\\arkfs\\LabelMatching\\target_folder"
+index = os.getcwd()
 
 class task_queue:
     def __init__(self, src) -> None:
@@ -35,7 +36,11 @@ class task_queue:
             if ref == 0:    # append
                 src = []
                 src.append(self.pop())
-                src.append(self.pop())
+                target_folder = self.pop()
+                if len(target_folder) == 0:
+                    src.append(index + "/target_folder")
+                else:
+                    src.append(target_folder)   # <- 演示目录
                 if len(self.type) == 0:
                     src.append(1)
                 else:
@@ -63,7 +68,11 @@ class task_queue:
                     src.append(None)
                 else:
                     src.append(feature)
-                src.append(index)   # <- 演示目录
+                target_folder = self.pop()
+                if len(target_folder) == 0:
+                    src.append(index + "/target_folder")
+                else:
+                    src.append(target_folder)   # <- 演示目录
                 src_list = my_search(src)
                 results = []
                 for i in src_list:

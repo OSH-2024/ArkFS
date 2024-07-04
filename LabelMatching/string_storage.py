@@ -56,6 +56,7 @@ class Trie_tree:
         flist = string_divide(flist, '/')
         flist = string_divide(flist, '.')
         flist = string_divide(flist, '_')
+        flist = string_divide(flist, '\\')
         for fname in flist:
             # print(fname)
             for k in fname:
@@ -111,6 +112,7 @@ def main():
         for file in files:
             file_path = os.path.join(root, file)
             file_list.append(file_path)
+    print (target_name, file_list)
     results = string_matching(target_name, file_list)
     print(results)
 

@@ -71,8 +71,12 @@ def search():
         tqueue1 = task_queue.task_queue(get_v2)
         state = tqueue1.execute()
         display(str(state))
+        sel_filelist.clear()
     else:
-        pass
+        tqueue = task_queue.task_queue(get_v)
+        filelist = tqueue.execute()
+        clear()
+        display(f"状态码:{filelist}")
 
 
     #end Yang Bingquan

@@ -1,7 +1,7 @@
 import speech_recognition as sr
 #语音转文字
 from datetime import datetime, timedelta
-
+  
 def recognize_speech_from_mic():
     # 获取默认的麦克风
     recognizer = sr.Recognizer()
@@ -35,7 +35,7 @@ def recognize_speech_from_mic():
 #        print(f"输入结果: {text_str}")
 #
     print(f"输入结果: {text_str}")
-    
+
     return text
 
 

@@ -9,7 +9,6 @@ def my_add(opcode):
         try:
             if opcode[2]:
                 # Create a directory
-                # Copy the directory to the target folder
                 if os.path.exists(os.path.join(opcode[1],opcode[3])):
                     opcode[3] = opcode[3] + "(1)"
                 os.makedirs(os.path.join(opcode[1],opcode[3]))

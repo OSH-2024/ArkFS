@@ -215,7 +215,7 @@ root = tk.Tk()
 root.title("File Display Interface")
 
 # Set window size
-root.geometry("1500x600")
+root.geometry("1000x600")
 
 # Search frame for search box and buttons
 search_frame = tk.Frame(root)

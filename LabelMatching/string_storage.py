@@ -87,6 +87,7 @@ def string_divide(target_names, ch):
 
 def string_matching(target_name, file_paths):
     targets = []
+    target_name = target_name.lower()
     pos = target_name.find(' ')
     while pos != -1:
         targets.append(target_name[0: pos])

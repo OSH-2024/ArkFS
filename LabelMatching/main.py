@@ -44,7 +44,7 @@ def search():
 
     get_v=aios.standard(user_input)
     #end Li Daifeng
-    #display(get_v)
+    print(get_v)
     #start Yang Bingquan
     if (get_v[3][0] == '3' or get_v[3][0] == '4') and len(get_v[3]) == 1:
         print("select 1")

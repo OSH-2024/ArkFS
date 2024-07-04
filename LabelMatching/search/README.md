@@ -1,3 +1,0 @@
-# Search Mode
-
-Now we have tested a bunch of LLMs, but unfortunately in an attempt to make CLIP, a model to process images to work well, we have to compromise on the performances of the LLMs processing texts. In fact, we have found a few LLMs that work well with texts, but they are incompatible with CLIP. We have to find a way to make them work together. What we choose now is a trade-off -- we choose deberta or xlm_roberta to work with text files, but neither of it work well now. Maybe a slight change of our code can help.

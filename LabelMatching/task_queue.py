@@ -45,14 +45,15 @@ class task_queue:
                 drain = self.pop()
                 if type(drain) == str:
                     src.append([])
+                elif len(drain) == 0:
+                    return 0
                 else:
                     src.append(drain)
                 target_folder = self.pop()
                 if len(target_folder) == 0:
-                    if len(self.type) == 0:
-                        src.append(index +"/default")
-                    else:
-                        src.append(index + "/target_folder")
+                    src.append(index +"/default")
+                    # else:
+                    #     src.append(index + "/target_folder")
                 else:
                     src.append(target_folder)   # <- 演示目录
                 if len(self.type) == 0:

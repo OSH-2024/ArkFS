@@ -17,8 +17,9 @@ class Trie_tree:
             ch_value = ord(ch) - ord('a')
             # print(index, ch_value)
             if self.matrix[index][ch_value] == 0:
-                self.matrix[index][ch_value] = self.nodenum
                 self.nodenum += 1
+                self.matrix[index][ch_value] = self.nodenum
+                
             index = self.matrix[index][ch_value]
         self.count[index] += 1
     
@@ -39,12 +40,13 @@ class Trie_tree:
     
     def initialize(self, targets):
         for target in targets:
+            # print(target)
             self.insert(target)
         self.build()
         # for i in range(50):
-        #     for j in range(26):
-        #         if self.matrix[i][j] != 0:
-        #             print(i, j)
+        #      for j in range(26):
+        #          if self.matrix[i][j] != 0:
+        #              print(i, j)
     
     def query(self, file_name):
         result = 0

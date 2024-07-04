@@ -91,6 +91,7 @@ class task_queue:
 
             elif ref == 4:  # accurate query
                 target_name = self.pop()
+                # print(target_name)
                 folder_path = self.pop()
                 if len(folder_path) == 0:
                     folder_path = index
@@ -114,12 +115,13 @@ class task_queue:
 
 
 def main():
-    print(index)
-    src = [['NULL','NULL'],'txt',[ [index + "/task_queue.py"], ""], "0"]
+    # print(index)
+    # src = [['NULL','NULL'],'txt',[ [index + "/task_queue.py"], ""], "0"]
+    src = [['NULL','NULL'],'txt',[ "ui", ""], "4"]
     tqueue = task_queue(src)
     # tqueue.show()
     results = tqueue.execute()
-    print(results)
+    # print(results)
 
 
 if __name__ == "__main__":

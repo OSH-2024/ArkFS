@@ -17,6 +17,19 @@ client = OpenAI(
         api_key="6a52536fbbf5c55bdb55cd1daddce81c:NjZhMjM1MDI3YzMwZjgxOGE2ZWY3NTQ5", 
         base_url = 'https://spark-api-open.xf-yun.com/v1' # 指向讯飞星火的请求地址
     )
+
+def remove_extra_quotes(input_list):
+    # 处理列表中的每个元素
+    for i, item in enumerate(input_list):
+        # 处理第三个参数（索引为2）
+        if i == 2:
+            for j, sub_item in enumerate(item):
+                # 检查子项是否是包含额外引号的字符串
+                if isinstance(sub_item, str) and sub_item.startswith("'") and sub_item.endswith("'"):
+                    # 去掉外层引号
+                    item[j] = sub_item.strip("'")
+    return input_list
+
 def process_input(prompt):
     """
     Process user input to extract time, file type, and content keywords.
@@ -29,10 +42,13 @@ def process_input(prompt):
     """
     # Special cases for single-character input and specific keywords
     if len(prompt) == 1:
-        return [[None], [None], [prompt], ['find']]
+        return [[None], 'NULL', prompt, '查']
 
     if prompt in ["图片", "文本"]:
-        return [[None], [prompt], [None], ['find']]
+        if prompt == "图片":
+            return [[None], 'image', 'NULL', '查']
+        elif prompt == "文本":
+            return [[None], 'txt', 'NULL', '查']
 
     # Make a request to generate completions based on the model and messages
     completion = client.chat.completions.create(
@@ -107,6 +123,9 @@ def standard(user_input):
         extracted_[2] = user_input
     
     extracted_[2] = [extracted_[2], ""]
+    
+    remove_extra_quotes(extracted_)
+
     return extracted_
 
 def parse_operations(param):
@@ -169,3 +188,4 @@ def input_user():
     else:
         input_user()
 
+input_user()

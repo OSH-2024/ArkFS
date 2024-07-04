@@ -43,6 +43,7 @@ def search():
         get_v = [['NULL'], 'NULL', [file_name,""], '4']
     else:
         get_v=aios.standard(user_input)
+        
     #end Li Daifeng
     print(get_v)
     #start Yang Bingquan

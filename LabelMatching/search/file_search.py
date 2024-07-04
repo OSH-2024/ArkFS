@@ -122,8 +122,8 @@ def search_files(image_index, text_index, image_paths, text_paths, file_info, qu
                (not modified_time_end or modified_time <= datetime.fromisoformat(modified_time_end)) and (score > 0.80):
                 filtered_results["text_results"].append(path)
 
-    filtered_results["image_results"].append(len(filtered_results["image_results"]))
-    filtered_results["text_results"].append(len(filtered_results["text_results"]))
+    #filtered_results["image_results"].append(len(filtered_results["image_results"]))
+    #filtered_results["text_results"].append(len(filtered_results["text_results"]))
 
     return filtered_results["image_results"], filtered_results["text_results"]
 

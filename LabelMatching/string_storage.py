@@ -45,7 +45,29 @@ class Trie_tree:
         #     for j in range(26):
         #         if self.matrix[i][j] != 0:
         #             print(i, j)
-        
+    
+    def query(self, file_name):
+        result = 0
+        pointer = 0
+        flist = []
+        flist.append(file_name.lower())
+        flist = string_divide(flist, '/')
+        flist = string_divide(flist, '.')
+        flist = string_divide(flist, '_')
+        for fname in flist:
+            # print(fname)
+            for k in fname:
+                j = ord(k) - ord('a')
+                if j < 0 or j > 200:
+                    break
+                # print(k, j)
+                pointer = self.matrix[pointer][j]
+                j = pointer
+                while j > 0 and self.count[j] != 0:
+                    result += self.count[j]
+                    j = self.nextp[j]
+
+        return result
 
 def string_divide(target_names, ch):
     targets = []
@@ -59,27 +81,7 @@ def string_divide(target_names, ch):
     return targets
 
 
-def query(target_tree, file_name):
-    result = 0
-    pointer = 0
-    flist = []
-    flist.append(file_name.lower())
-    flist = string_divide(flist, '/')
-    flist = string_divide(flist, '.')
-    flist = string_divide(flist, '_')
-    for fname in flist:
-        # print(fname)
-        for k in fname:
-            j = ord(k) - ord('a')
-            if j < 0:
-                break
-            pointer = target_tree.matrix[pointer][j]
-            j = pointer
-            while j > 0 and target_tree.count[j] != 0:
-                result += target_tree.count[j]
-                j = target_tree.nextp[j]
-    
-    return result
+
 
 def string_matching(target_name, file_paths):
     targets = []
@@ -93,7 +95,7 @@ def string_matching(target_name, file_paths):
     target_tree.initialize(targets)
     results = []
     for file_name in file_paths:
-        if query(target_tree, file_name) > 0:
+        if target_tree.query(file_name) > 0:
             results.append(file_name)
     return results
 

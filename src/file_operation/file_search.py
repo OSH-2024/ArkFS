@@ -119,7 +119,7 @@ def search_files(image_index, text_index, image_paths, text_paths, file_info, qu
         if info:
             modified_time = datetime.fromisoformat(info['modified_time'])
             if (not modified_time_start or modified_time >= datetime.fromisoformat(modified_time_start)) and \
-               (not modified_time_end or modified_time <= datetime.fromisoformat(modified_time_end)) and (score > 0.80):
+                (not modified_time_end or modified_time <= datetime.fromisoformat(modified_time_end)) and (score > 0.60):
                 filtered_results["text_results"].append(path)
 
     #filtered_results["image_results"].append(len(filtered_results["image_results"]))

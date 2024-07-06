@@ -1,4 +1,4 @@
-from file_search_opt_1 import my_search
+from file_search import my_search
 import time
 
 start_time = time.time()

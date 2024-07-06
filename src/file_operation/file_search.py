@@ -4,18 +4,22 @@ import faiss
 import os
 import numpy as np
 from PIL import Image
-from transformers import DebertaTokenizer, DebertaModel
 from datetime import datetime
+from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 def load_models(device):
     clip_model, clip_preprocess = clip.load("ViT-B/32", device=device)
-    model_name = "microsoft/deberta-base"
-    tokenizer = DebertaTokenizer.from_pretrained(model_name)
-    deberta_model = DebertaModel.from_pretrained(model_name).to(device)
-    return clip_model, clip_preprocess, tokenizer, deberta_model
+    t5_tokenizer = T5Tokenizer.from_pretrained("t5-small")
+    t5_model = T5ForConditionalGeneration.from_pretrained("t5-small").to(device)
+    return clip_model, clip_preprocess, t5_tokenizer, t5_model
 
-def process_file(file_path, clip_model, clip_preprocess, tokenizer, deberta_model, image_features, text_features, image_paths, text_paths, file_info, device):
-    try:
+def summarize_text(text, tokenizer, model, device):
+    input_ids = tokenizer.encode("summarize: " + text, return_tensors="pt", max_length=512, truncation=True).to(device)
+    summary_ids = model.generate(input_ids, max_length=60, min_length=30, length_penalty=2.0, num_beams=4, early_stopping=True)
+    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+    return summary
+
+def process_file(file_path, clip_model, clip_preprocess, tokenizer, summarization_model, image_features, text_features, image_paths, text_paths, file_info, device):
         if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
             image = clip_preprocess(Image.open(file_path)).unsqueeze(0).to(device)
             with torch.no_grad():
@@ -25,12 +29,23 @@ def process_file(file_path, clip_model, clip_preprocess, tokenizer, deberta_mode
         elif file_path.lower().endswith('.txt'):
             with open(file_path, 'r', encoding='utf-8') as f:
                 text = f.read().strip()
-            inputs = tokenizer(text, return_tensors="pt", max_length=512, truncation=True, padding=True).to(device)
-            with torch.no_grad():
-                outputs = deberta_model(**inputs)
-            feature = outputs.last_hidden_state.mean(dim=1)
-            text_features.append(feature.cpu().numpy())
-            text_paths.append(file_path)
+            try:
+                text_tokens = clip.tokenize([text]).to(device)
+                with torch.no_grad():
+                    feature = clip_model.encode_text(text_tokens)
+                text_features.append(feature.cpu().numpy())
+                text_paths.append(file_path)
+            except Exception as clip_error:
+                try:
+                    # 生成摘要
+                    summary = summarize_text(text, tokenizer, summarization_model, device)
+                    summary_tokens = clip.tokenize([summary]).to(device)
+                    with torch.no_grad():
+                        feature = clip_model.encode_text(summary_tokens)
+                    text_features.append(feature.cpu().numpy())
+                    text_paths.append(file_path)
+                except Exception as summary_error:
+                    return
 
         file_stat = os.stat(file_path)
         modified_time = datetime.fromtimestamp(file_stat.st_mtime).isoformat()
@@ -39,12 +54,11 @@ def process_file(file_path, clip_model, clip_preprocess, tokenizer, deberta_mode
             "modified_time": modified_time,
             "file_name": os.path.basename(file_path)
         })
-    except Exception as e:
-        print(f"Error processing file {file_path}: {e}")
+
 
 def process_files_query(file_dir, query):
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    clip_model, clip_preprocess, tokenizer, deberta_model = load_models(device)
+    clip_model, clip_preprocess, t5_tokenizer, t5_model = load_models(device)
 
     image_features = []
     text_features = []
@@ -54,7 +68,7 @@ def process_files_query(file_dir, query):
 
     for root, _, files in os.walk(file_dir):
         for fname in files:
-            process_file(os.path.join(root, fname), clip_model, clip_preprocess, tokenizer, deberta_model, image_features, text_features, image_paths, text_paths, file_info, device)
+            process_file(os.path.join(root, fname), clip_model, clip_preprocess, t5_tokenizer, t5_model, image_features, text_features, image_paths, text_paths, file_info, device)
 
     image_features = np.vstack(image_features) if image_features else np.array([])
     if image_features.size > 0:
@@ -72,18 +86,14 @@ def process_files_query(file_dir, query):
     if text_index:
         text_index.add(text_features)
         
+    # if len(query) > 70:
+    #     query = query[:70]  # 截断查询到70个字符
     query_input = clip.tokenize([query]).to(device)
     with torch.no_grad():
-        query_feature_clip = clip_model.encode_text(query_input).cpu().numpy()
-    query_feature_clip /= np.linalg.norm(query_feature_clip)
+        query_feature = clip_model.encode_text(query_input).cpu().numpy()
+    query_feature /= np.linalg.norm(query_feature)
 
-    inputs = tokenizer(query, return_tensors="pt", max_length=512, truncation=True, padding=True).to(device)
-    with torch.no_grad():
-        outputs = deberta_model(**inputs)
-    query_feature_deberta = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
-    query_feature_deberta /= np.linalg.norm(query_feature_deberta)
-
-    return image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta
+    return image_index, text_index, image_paths, text_paths, file_info, query_feature
 
 def search_images(image_index, image_paths, query_feature, k=5):
     if not image_index:
@@ -97,9 +107,9 @@ def search_texts(text_index, text_paths, query_feature, k=5):
     D, I = text_index.search(query_feature, k)
     return [(text_paths[i], D[0][j]) for j, i in enumerate(I[0])]
 
-def search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta, modified_time_start=None, modified_time_end=None, k=5):
-    image_results = search_images(image_index, image_paths, query_feature_clip, k)
-    text_results = search_texts(text_index, text_paths, query_feature_deberta, k)
+def search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature, modified_time_start=None, modified_time_end=None, k=5):
+    image_results = search_images(image_index, image_paths, query_feature, k)
+    text_results = search_texts(text_index, text_paths, query_feature, k)
 
     filtered_results = {
         "image_results": [],
@@ -122,9 +132,6 @@ def search_files(image_index, text_index, image_paths, text_paths, file_info, qu
                (not modified_time_end or modified_time <= datetime.fromisoformat(modified_time_end)) and (score > 0.80):
                 filtered_results["text_results"].append(path)
 
-    #filtered_results["image_results"].append(len(filtered_results["image_results"]))
-    #filtered_results["text_results"].append(len(filtered_results["text_results"]))
-
     return filtered_results["image_results"], filtered_results["text_results"]
 
 def simple_search(modified_time, target_folder):
@@ -134,31 +141,32 @@ def simple_search(modified_time, target_folder):
     modified_time_end = modified_time[1] or None
     for root, _, files in os.walk(target_folder):
         for fname in files:
+            file_path = os.path.join(root, fname)
+            file_stat = os.stat(file_path)
+            file_modified_time = datetime.fromtimestamp(file_stat.st_mtime).isoformat()
             if(fname.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))):
-                if (not modified_time_start or datetime.fromisoformat(modified_time) >= datetime.fromisoformat(modified_time_start)) and \
-                (not modified_time_end or datetime.fromisoformat(modified_time) <= datetime.fromisoformat(modified_time_end)):
-                    image_results.append(os.path.join(root, fname))
+                if (not modified_time_start or file_modified_time >= modified_time_start) and \
+                (not modified_time_end or file_modified_time <= modified_time_end):
+                    image_results.append(file_path)
             elif(fname.lower().endswith('.txt')):
-                if (not modified_time_start or datetime.fromisoformat(modified_time) >= datetime.fromisoformat(modified_time_start)) and \
-                (not modified_time_end or datetime.fromisoformat(modified_time) <= datetime.fromisoformat(modified_time_end)):
-                    text_results.append(os.path.join(root, fname))
+                if (not modified_time_start or file_modified_time >= modified_time_start) and \
+                (not modified_time_end or file_modified_time <= modified_time_end):
+                    text_results.append(file_path)
     
-    # image_results.append(len(image_results))
-    # text_results.append(len(text_results))
     return image_results, text_results
                    
 # opcode = [modified_time, content, target_folder]
 def my_search(opcode):
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     modified_time = opcode[0]
     content = opcode[1]
     target_folder = opcode[2]
     if not content:
         image_results, text_results = simple_search(modified_time, target_folder)
     else:
-        os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-        image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta = process_files_query(target_folder, content)
+        image_index, text_index, image_paths, text_paths, file_info, query_feature = process_files_query(target_folder, content)
         modified_time_start = modified_time[0] or None
         modified_time_end = modified_time[1] or None
-        image_results, text_results = search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature_clip, query_feature_deberta, modified_time_start, modified_time_end, k=10)
+        image_results, text_results = search_files(image_index, text_index, image_paths, text_paths, file_info, query_feature, modified_time_start, modified_time_end, k=10)
 
     return [image_results, text_results]

@@ -14,7 +14,8 @@ def load_models(device):
     return clip_model, clip_preprocess, t5_tokenizer, t5_model
 
 def summarize_text(text, tokenizer, model, device):
-    input_ids = tokenizer.encode("summarize: " + text, return_tensors="pt", max_length=512, truncation=True).to(device)
+    text = "summarize" + text 
+    input_ids = tokenizer.encode(text, return_tensors="pt", max_length=512, truncation=True).to(device)
     summary_ids = model.generate(input_ids, max_length=60, min_length=30, length_penalty=2.0, num_beams=4, early_stopping=True)
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return summary

@@ -25,7 +25,7 @@
 
 组员：常圣 负责“执行层”——增，删，向量化索引
 
-组员：刘明乐 负责“用户层”——UI界面设计
+组员：刘明乐 负责“应用层”——UI界面设计
 
 
 ## 2. 解析层
@@ -146,3 +146,85 @@ def extract_information(input_text: str):
 
 
 如上图，在我们的现有工作基础上，我们可以再加一层大模型处理，将多任务分解为单任务来运行，可以将复杂的任务解析成多个特征向量传递给下层，而下层我们可以说明是支持这样的多个向量的(详见管理层)。
+
+## 5. 应用层
+### 5.1 用户输入
+
+用户交互界面实现了两种用户输入方式——语音输入以及文字输入。其中，语音输入套在文字输入的外层，语音识别的结果将会直接显示在文字输入的输入框中，用户若是对语音识别的结果有纠正的需求，便可以直接在输入框中进行修改。
+![liu1](../../pics/liu1.png)
+
+### 5.2 调用流程
+
+UI代码作为整个项目的顶层代码，除了需要进行用户的交互任务之外，还负责整个项目的下层函数调用。换言之，整个项目的main函数也嵌套在UI部分之中，由本人负责编写。  
+首先，用户输入完成之后，UI调用解析层函数，将自然语言字符串原模原样向下传递，对于应用层而言，解析层具体实现完全不可见，从而实现了分层的分工和设计。解析层将会返回一个拥有固定格式的list，其中包含了用户需求中蕴含的关键信息。  
+其次，应用层对用户的需求解析进行三类划分。1、需要展示，无需筛选。应用层若发现用户需求为“查”或“精确查找”，则将该需求完整传递给管理层。2、需要展示，需要筛选。应用层若发现用户需求为“查+……”，则将用户需求操作截断为查以及后续操作。首先将查操作传递给管理层，待用户进行手动筛选之后，再将筛选结果和后续操作一起传递给管理层，对于整个过程的执行而言，等效于UI（用户）插手将任务队列打断。3、无需展示，无需筛选。若操作队列中不包含查，则无需展示任何返回，也不需要用户进行勾选，将用户操作完整传递给管理层即可。  
+UI与下层代码执行的流程图大致如下：
+![liu2](../../pics/liu2.png)
+
+### 5.3 展示与筛选
+
+管理层进行完“查”的操作之后，将会返回由文件绝对路径组成的列表，UI负责对文件类型进行判断，若为任何图片类型，则展示图片的缩略图以及文件路径，若为非图片，则仅仅展示文件路径。此外，当需要筛选的时候，在每个绝对路径右侧都会展示一个勾选框，以便用户进行操作对象的筛选。用户筛选完成后单击confirm按钮，UI将会返回一个由选中的绝对路径组成的list，并将其传递给管理层进行后续操作。演示效果可参见演示视频。参见video文件夹。
+
+### 5.4 代码展示
+以下展示用户按下确定按钮之后的执行逻辑，即本项目实际的main函数。
+```python
+def search():
+    global sel_filelist
+    user_input = search_entry.get()
+    clear()
+    #display("请输入一个描述图片信息的句子，例如：“请给我一张昨天修改的带草的图片”。")
+    #display("精确化搜索请使用“叫xxx的文件”或“名为xxx的文件”格式。")
+    #start Li Daifeng
+    is_precise, file_name = aios.is_precise_search(user_input)
+    if is_precise:
+        display("精确搜索确认")
+        #print(f"提取的信息: [['NULL'], ['NULL'], [{file_name}," "], ['4']]")
+        get_v = [['NULL'], 'NULL', [file_name,""], '4']
+    else:
+        get_v=aios.standard(user_input)
+        
+    #end Li Daifeng
+    print(get_v)
+    #start Yang Bingquan
+    if (get_v[3][0] == '3' or get_v[3][0] == '4') and len(get_v[3]) == 1:
+        print("select 1")
+        tqueue = task_queue.task_queue(get_v)
+        filelist = tqueue.execute()
+        print(filelist)
+        clear()
+        input_paths(filelist, 0)
+    elif get_v[3][0] == '3':
+        print("select 2")
+        get_v1 = get_v.copy()
+        get_v2 = get_v.copy()
+        get_v1[3] = "3"
+        get_v2[3] = get_v[3][1:]
+        tqueue = task_queue.task_queue(get_v)
+        filelist = tqueue.execute()
+        clear()
+        input_paths(filelist, 1)
+        root.wait_variable(decision_made)
+        if decision_made.get() == "go":
+            clear()
+            decision_made.set("")
+        get_v2[2][0] = sel_filelist
+        tqueue1 = task_queue.task_queue(get_v2)
+        state = tqueue1.execute()
+        if state == 0:
+            display("已完成")
+        else:
+            display("出错！请重试")
+        sel_filelist.clear()
+    else:
+        tqueue = task_queue.task_queue(get_v)
+        filelist = tqueue.execute()
+        clear()
+        if filelist == 0:
+            display("已完成")
+        else:
+            display("出错！请重试")
+
+
+    #end Yang Bingquan
+    # Add actual search logic here
+```

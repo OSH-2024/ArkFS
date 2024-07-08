@@ -2,6 +2,8 @@
 
 - [0 成员介绍](#0-成员介绍)
 - [1 项目简介](#1-项目简介)
+  - [1.1 项目背景](#11-项目背景)
+  - [1.2 立项依据 —— AIOS](#12-立项依据--aios)
 - [2 解析层](#2-解析层)
   - [2.1 解析层的任务](#21-解析层的任务)
   - [2.2 关键信息的选择](#22-关键信息的选择)
@@ -41,11 +43,102 @@
 ## 1 项目简介
 大语言模型在近几年已取得巨大发展。本项目受AIOS（即大语言模型智能体操作系统）思想启发，旨在利用大语言模型提取文本中的关键信息，形成特征向量传递给任务调度层，通过执行对应操作，实现文件系统的自动化操作，同时验证AIOS的可行性。本项目分为解析层、管理层、执行层和应用层四个部分，其中解析层负责对自然语言命令的解析，管理层负责任务队列的建立，执行层负责增、删、改、查等操作。应用层则负责用户交互界面的设计，实现用户输入、调用流程、展示与筛选等功能。本项目的目标是提高文件系统操作的自动化程度和效率，减少人工干预，提升用户体验。
 
+### 1.1 项目背景
+
+近年来，随着深度学习技术的进步和计算能力的提升，大语言模型在自然语言处理领域取得了显著的进展，并被广泛应用于各种应用场景，如智能助手、智能客服、文本生成等。利用大语言模型对文本内容深度理解与分析，可以实现以下几种功能：
+
+- 自动摘要。大语言模型可以自动提取文本的关键信息，生成文本摘要，以帮助用户快速了解文本内容。以下是使用Transformers库中pipeline模块进行文本摘要的示例代码：
+
+```python
+
+from transformers import pipeline
+
+summarizer = pipeline("summarization")
+summarizer(
+    """
+    America has changed dramatically during recent years. Not only has the number of 
+    graduates in traditional engineering disciplines such as mechanical, civil, 
+    electrical, chemical, and aeronautical engineering declined, but in most of 
+    the premier American universities engineering curricula now concentrate on 
+    and encourage largely the study of engineering science. As a result, there 
+    are declining offerings in engineering subjects dealing with infrastructure, 
+    the environment, and related issues, and greater concentration on high 
+    technology subjects, largely supporting increasingly complex scientific 
+    developments. While the latter is important, it should not be at the expense 
+    of more traditional engineering.
+
+    Rapidly developing economies such as China and India, as well as other 
+    industrial countries in Europe and Asia, continue to encourage and advance 
+    the teaching of engineering. Both China and India, respectively, graduate 
+    six and eight times as many traditional engineers as does the United States. 
+    Other industrial countries at minimum maintain their output, while America 
+    suffers an increasingly serious decline in the number of engineering graduates 
+    and a lack of well-educated engineers.
+"""
+)
+```
+
+```
+[{'summary_text': ' America has changed dramatically during recent years . The '
+                  'number of engineering graduates in the U.S. has declined in '
+                  'traditional engineering disciplines such as mechanical, civil '
+                  ', electrical, chemical, and aeronautical engineering . Rapidly '
+                  'developing economies such as China and India, as well as other '
+                  'industrial countries in Europe and Asia, continue to encourage '
+                  'and advance engineering .'}]
+```
+
+- 智能回答。在文本内容基础上加以分析，从中检索出相关信息回答用户问题。以下是使用Transformers库中pipeline模块进行问答的示例代码：
+
+```python
+from transformers import pipeline
+
+question_answerer = pipeline("question-answering")
+question_answerer(
+    question="Where do I work?",
+    context="My name is Sylvain and I work at Hugging Face in Brooklyn",
+)
+```
+
+```
+{'score': 0.6385916471481323, 'start': 33, 'end': 45, 'answer': 'Hugging Face'}
+```
+
+- 零样本分类。大语言模型可以自动分析内容，提取包括主题、人物、地点、时间、事件等关键信息，并根据用户意图、上下文和历史行为等进行智能化组织和推荐。以下是使用Transformers库中pipeline模块进行零样本分类的示例代码：
+
+```python
+from transformers import pipeline
+
+classifier = pipeline("zero-shot-classification")
+classifier(
+    "This is a course about the Transformers library",
+    candidate_labels=["education", "politics", "business"],
+)
+```
+
+```
+{'sequence': 'This is a course about the Transformers library',
+ 'labels': ['education', 'business', 'politics'],
+ 'scores': [0.8445963859558105, 0.111976258456707, 0.043427448719739914]}
+```
+
+从上述运行结果，我们看到，模型将输入文本分类为“education”类别的概率最高，为0.8446。这种零样本分类技术可以应用于文件管理系统中，以实现文件的自动分类和检索。
+
+
+### 1.2 立项依据 —— AIOS
+
+AIOS是一种LLM智能体操作系统，将大语言模型嵌入操作系统（OS）作为OS的大脑，实现了``有灵魂''的操作系统，即能够独立运行、做出决策和执行任务而无需或需要最少的人工干预的系统。这些智能体旨在理解指令、处理信息、做出决策并采取行动以实现自主状态。
+
+![Alt pic](./src/example.png "AIOS工作实例")
+
+上图展示了AIOS如何划分工作并自主执行任务的全流程。受AIOS启发，我们选择使用任务队列来管理文件系统，详见后文管理层部分。
+
+
 ## 2 解析层
 
 ### 2.1 解析层的任务
 
-用大语言模型提取文本中的关键信息，形成特征向量传递给任务调度层
+用大语言模型提取文本中的关键信息，形成特征向量传递给管理层
 
 在这一层需要解决的问题：
 - 1. 我们需要得到什么关键信息
@@ -160,7 +253,144 @@ def extract_information(input_text: str):
 
 ## 3 管理层
 
-TO BE DONE
+作为解析层、执行层和应用层之间的桥梁，管理层负责对解析层提取到的信息做预处理，再将符合格式的数据传入执行层，以及将执行层返回的数据传入应用层。
+
+### 3.1 任务队列管理
+
+为提高任务队列的扩展性，使用栈管理传入的参数：查、增操作的返回值均可能为下一操作的传入参数，如“查找一张xxx图片
+，并将其复制到xxx文件夹”，查的输出即增的输入。调用函数时弹栈获取参数，可保证参数获取正确，且为程序的并发执行、后台管理等后续进展提供基础。以下展示任务队列类的代码：
+
+``` python
+class task_queue:
+    def __init__(self, src) -> None:
+        self.time = src[0]
+        self.type = src[1]
+        if self.type == 'NULL':
+            self.type = ''
+        self.opcode = src[3]
+        self.srcs = queue.LifoQueue()
+        self.srcs.put(src[2][1])
+        self.srcs.put(src[2][0])
+
+
+    def push(self, src):
+        self.srcs.put(src)
+    
+    def pop(self):
+        return self.srcs.get()
+
+    def clear(self):
+        return self.srcs.empty()
+    
+    def show(self):
+        print(f'time: {self.time}')
+        print(f'type: {self.type}')
+        print(f'opcode: {self.opcode}')
+        print(f'src: {self.srcs}')
+      
+    def execute(self):
+        state = 0
+        for ch in self.opcode:
+            ref = ord(ch) - ord('0')    # operation code
+            if ref == 0:    # append
+                src = []
+                drain = self.pop()
+                if type(drain) is str:
+                    src.append([])
+                elif len(drain) == 0:
+                    return 0
+                else:
+                    src.append(drain)
+                target_folder = self.pop()
+                if len(target_folder) == 0:
+                    src.append(index +"/default")
+                else:
+                    src.append(target_folder)   # <- 演示目录
+                if len(self.type) == 0:
+                    src.append(1)
+                else:
+                    src.append(0)
+                name = np.random.randint(0, 65535)
+                if len(self.type) == 0:
+                    src.append(str(name))
+                else:
+                    src.append(str(name) +"." +self.type)
+                state = my_add(src) # Error code
+                self.push(drain)
+
+            elif ref == 1:  # delete
+                src = self.pop()
+                state = my_delete(src)
+                
+            elif ref == 2:  # modify
+                continue
+            
+            elif ref == 3:  # query
+                src = []
+                time = []
+                for i in range(0,2):
+                    if self.time[i] == 'NULL':
+                        time.append(None)
+                    else:
+                        time.append(self.time[i])
+                src.append(time)
+                feature = self.pop()
+                if feature == 'NULL':
+                    src.append(None)
+                else:
+                    src.append(feature)
+                target_folder = self.pop()
+                if len(target_folder) == 0:
+                    src.append(index)
+                else:
+                    src.append(target_folder)   # <- 演示目录
+                src_list = my_search(src)
+                if self.type == "image":
+                    return src_list[0]
+                elif self.type == "text":
+                    return src_list[1]
+                else:
+                    results = []
+                    for i in src_list:
+                        for j in i:
+                            results.append(j)
+                    return results
+
+            elif ref == 4:  # accurate query
+                target_name = self.pop()
+                folder_path = self.pop()
+                if len(folder_path) == 0:
+                    folder_path = index
+                else:
+                    pass   # <- 演示目录
+                file_list = [] 
+                for root, dirs, files in os.walk(folder_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        file_list.append(file_path)
+                results = string_storage.string_matching(target_name, file_list)
+                return results
+            else:
+                continue
+            if state != 0:
+                break
+        return state
+```
+
+
+### 3.2 数据预处理
+
+解析层传入的参数与执行层的各函数需要传入的参数的格式是不相同的，总结如下：
+
+|   参数列表及格式
+传入参数 | [modified_time, type, [feature / [sources], target_folder], opcode]
+增 | [[sources], target_folder, file(0)/dir(1), name]
+删 | [sources]
+查 | [modified_time, content, target_folder]
+
+
+考虑到“查”操作后（需用户确认）需重新创建对象，且由于“查”函数返回值为列表类型，与传入参数feature字符串类型不同，故复用该参数以减小参数复杂度。
+
 
 ## 4 执行层
 
@@ -190,7 +420,86 @@ TO BE DONE
 
 #### 4.3.1 精确查找
 
-TO BE DONE
+本模块基于AC自动机算法，实现了精确查找功能，目前可实现对英文文件名的高效搜索。
+
+Aho-Corasick 自动机是以Trie树的结构为基础，结合 KMP 的思想建立的自动机。这个算法是为了解决在一个主文本字符串中查找多个模式字符串（或称为“关键词”）的问题。AC自动机的预处理时间复杂度为O(m)，其中m是所有模式串的长度之和。在匹配过程中，每个字符的处理时间复杂度是O(1)或O(k)，其中k是字符集的大小，因此匹配效率非常高。其工作流程如下：
+
+- 构建Trie树：AC自动机基于Trie树（字典树）来存储模式串。每个节点代表一个字符，从根节点到叶子节点的路径形成一个模式串。
+
+- 构建失败指针（Failure Pointer）：在构建Trie树的同时，构建失败指针。失败指针指向在匹配过程中如果匹配失败应该跳转到的下一个状态节点。这一步是AC自动机的关键，使得匹配失败时能够快速回退，避免不必要的回溯。
+
+- 匹配过程： 将待匹配的文本按顺序送入AC自动机，从根节点开始，逐字符进行匹配。如果当前字符无法匹配当前状态的任何子节点，根据失败指针跳转到下一个状态节点，并继续匹配。
+
+- 输出处理： 当到达某个状态节点时，检查该节点是否对应一个完整的模式串（即该节点是某个模式串的结束节点）。如果是，则记录匹配结果。
+
+以下展示 Trie_tree 类的代码：
+
+```python
+class Trie_tree:
+    def __init__(self):
+        self.matrix = np.zeros((500, 95), dtype=int)
+        self.count = np.zeros(500, dtype=int)
+        self.nextp = np.zeros(500, dtype=int)
+        self.nodenum = 0
+
+    def insert(self, target): #AC自动机初始化
+        index = 0
+        for ch in target:
+            ch_value = ord(ch) - ord('!')
+            # print(index, ch_value)
+            if self.matrix[index][ch_value] == 0:
+                self.nodenum += 1
+                self.matrix[index][ch_value] = self.nodenum
+                
+            index = self.matrix[index][ch_value]
+        self.count[index] += 1
+    
+    def build(self):
+        q = queue.Queue()
+        for i in range(0, 95):
+            if self.matrix[0][i] != 0:
+                q.put(self.matrix[0][i])
+        while (not q.empty()):
+            element = q.get()
+            for i in range(0, 95):
+                node = self.matrix[element][i]
+                if node:
+                    self.nextp[node] = self.matrix[self.nextp[element]][i]
+                    q.put(node)
+                else:
+                    self.matrix[element][i] = self.matrix[self.nextp[element]][i]
+    
+    def initialize(self, targets):
+        for target in targets:
+            # print(target)
+            self.insert(target)
+        self.build()
+    
+    def query(self, file_name):
+        result = 0
+        pointer = 0
+        flist = []
+        flist.append(file_name.lower())
+        flist = string_divide(flist, '/')
+        flist = string_divide(flist, '.')
+        flist = string_divide(flist, '_')
+        flist = string_divide(flist, '\\')
+        for fname in flist:
+            # print(fname)
+            for k in fname:
+                j = ord(k) - ord('!')
+                if j < 0 or j > 200:
+                    break
+                # print(k, j)
+                pointer = self.matrix[pointer][j]
+                j = pointer
+                while j > 0 and self.count[j] != 0:
+                    result += self.count[j]
+                    j = self.nextp[j]
+
+        return result
+```
+
 
 #### 4.3.2 模糊查找
 
@@ -297,4 +606,19 @@ def search():
 
 ## 6 总结与展望
 
-TO BE DONE
+我们受AIOS的启发，将大模型嵌入文件系统，使用大模型理解用户文本语义，并实现了增、删、查的文件操作。本项目的创新点在于使用大模型理解用户需求，形成文件操作的任务队列，且该过程无需人工干预；将大模型本地部署，学习本地文件，实现了向量化检索。
+
+未来我们的项目可以有以下三方面的改进：
+
+- 实现更复杂语言的判定：
+    - 解析层：上层LLM的加入，参数扩充
+    - 管理层：任务队列和参数栈支持
+    - 执行层：更多的可调用syscall
+
+- 完全本地化的运行策略：
+    - 解析层：OLLama的本地训练
+    - 执行层：大模型的统一使用
+    - 应用层：本地化的语音转文字
+
+- 更优雅的设计：
+    - 应用层：app的封装，更精美的UI设计

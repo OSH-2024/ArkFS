@@ -17,12 +17,15 @@
     - [2.4.2 远端方案](#242-远端方案)
   - [2.5 多任务复合语句的解决方案](#25-多任务复合语句的解决方案)
 - [3 管理层](#3-管理层)
+  - [3.1 任务队列管理](#31-任务队列管理)
+  - [3.2 数据预处理](#32-数据预处理)
 - [4 执行层](#4-执行层)
   - [4.1 文件增添](#41-文件增添)
   - [4.2 文件删除](#42-文件删除)
   - [4.3 文件查找](#43-文件查找)
     - [4.3.1 精确查找](#431-精确查找)
     - [4.3.2 模糊查找](#432-模糊查找)
+  - [4.4 文件修改](#44-文件修改)
 - [5 应用层](#5-应用层)
   - [5.1 用户输入](#51-用户输入)
   - [5.2 调用流程](#52-调用流程)
@@ -509,9 +512,53 @@ class Trie_tree:
 
 为实现上述功能，我们设计了`file_search.py`。引入大模型`CLIP: ViT-B/32`和`T5: t5-small`，并加载预训练模型。`CLIP`模型提供了`model.encode_image(image: Tensor)`和`model.encode_text(text: Tensor)`两个函数，分别用于图片和文本的向量化。但是，由于`CLIP`模型文本上下文限制，因此对于长文本，先使用`T5`模型生成合适长度的摘要再将其传给`CLIP`进行编码即可。生成的特征向量通过归一化后构建Faiss索引，根据`content`的特征向量进行相似度搜索，返回结果。最后根据`[start_time, end_time]`进行时间筛选，返回结果。同时对于相似度阈值进行了设定，以保证搜索结果的准确性。
 
+文件处理代码如下：
+
+```python
+def process_file(file_path, clip_model, clip_preprocess, tokenizer, summarization_model, image_features, text_features, image_paths, text_paths, file_info, device):
+        if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+            image = clip_preprocess(Image.open(file_path)).unsqueeze(0).to(device)
+            with torch.no_grad():
+                feature = clip_model.encode_image(image)
+                image_features.append(feature.cpu().numpy())
+                image_paths.append(file_path)
+        elif file_path.lower().endswith('.txt'):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                text = f.read().strip()
+            try:
+                text_tokens = clip.tokenize([text]).to(device)
+                with torch.no_grad():
+                    feature = clip_model.encode_text(text_tokens)
+                text_features.append(feature.cpu().numpy())
+                text_paths.append(file_path)
+            except Exception as clip_error:
+                try:
+                    # 生成摘要
+                    summary = summarize_text(text, tokenizer, summarization_model, device)
+                    summary_tokens = clip.tokenize([summary]).to(device)
+                    with torch.no_grad():
+                        feature = clip_model.encode_text(summary_tokens)
+                    text_features.append(feature.cpu().numpy())
+                    text_paths.append(file_path)
+                except Exception as summary_error:
+                    return
+
+        file_stat = os.stat(file_path)
+        modified_time = datetime.fromtimestamp(file_stat.st_mtime).isoformat()
+        file_info.append({
+            "file_path": file_path,
+            "modified_time": modified_time,
+            "file_name": os.path.basename(file_path)
+        })
+```
+
 已模糊搜索“grass”测试结果如下：
 
 ![test_search](pics/test_search.jpg)
+
+### 4.4 文件修改
+
+当前，我们对于文件的修改方式是模糊搜索或直接搜索对应的文件，并提供用户相应链接，让用户打开文件后进行手动更改，而不是直接修改文件。这样做的原因防止用大模型直接对文件修改而导致的不可逆错误。
   
 ## 5 应用层
 

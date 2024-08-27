@@ -3,6 +3,7 @@ from openai import OpenAI
 import time
 import ast
 import re
+import os
 from query_processing.speak_to_text import recognize_speech_from_mic, map_relative_time_to_iso
 from datetime import datetime, timedelta
 
@@ -12,11 +13,14 @@ def convert_string_to_list(input_str):
     matches = re.findall(r'\[([^\[\]]*)\]', input_str)
     return matches
 
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise ValueError("API key is missing. Please set the GEMINI_API_KEY environment variable.")
+
 client = OpenAI(
-				# 控制台获取key和secret拼接，假使APIKey是key123456，APISecret是secret123456
-        api_key="6a52536fbbf5c55bdb55cd1daddce81c:NjZhMjM1MDI3YzMwZjgxOGE2ZWY3NTQ5", 
-        base_url = 'https://spark-api-open.xf-yun.com/v1' # 指向讯飞星火的请求地址
-    )
+    api_key=api_key,  # Replace with your Google Gemini API Key
+    base_url="https://gemini-api.google.com/v1"  
+)
 
 def remove_extra_quotes(input_list):
     # 去除列表中的额外引号
@@ -48,8 +52,9 @@ def process_input(prompt):
             return [[None], 'txt', 'NULL', '查']
 
     # Make a request to generate completions based on the model and messages
-    completion = client.chat.completions.create(
-        model='generalv3.5',  # Specify the model version
+    
+    completion = client.generate_response(
+        model='gemini-model-v1',  # 替换为Google Gemini支持的模型名称
         messages=[
             {
                 "role": "user",
@@ -61,7 +66,7 @@ def process_input(prompt):
     )
 
      # Extract and format response
-    response = completion.choices[0].message.content
+    response = completion['data']['response_text']
     result_list = convert_string_to_list(response)
     return result_list
 

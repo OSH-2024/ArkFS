@@ -1,34 +1,44 @@
 # ArkFS
 A LLM embeded file system
-#### 小组成员
+#### group member
 杨柄权、刘明乐、李岱峰、常圣
 
-Saint XK - 技术顾问
+Yang Bingquan, Liu Mingle, Li Daifeng, Chang Sheng
 
-## 关于lab4
-lab4已经完成(6.25) ，请学长验收。
-
-## 关于项目
-
-大语言模型在近几年的发展中取得了巨大的突破。目前已有许多研究人员将大模型应用于操作系统，如则是最近发表的大语言模型在操作系统层级应用的重要成果。文件系统是操作系统的重要组成部分，也有许多在探索其优化方向以及改进方法。本小组调研了三种大语言模型以及文件系统目前存在的部分问题。
+Saint XK - technical adviser , the professor of USTC
 
 
-## 项目进度
+## About the project
 
-|项目阶段|阶段时间|阶段简介/阶段成果|工作分工|
-|:-:|:-:|:-|:-:|
-|初步选题调研阶段|3.28|在这一阶段，我们小组通过对各自心仪的方向进行调研，结合操作系统的实验工作方向以及目前大模型应用，在指导老师的帮助下，我们迅速确定大模型和操作系统中文件管理系统的选题，并锁定三种大模型——autogpt、longchain、transformer。分工也迅速明确。|杨柄权：文件系统的调查；刘明乐：autogpt，李岱峰：longchain，常圣：transformer。|
-|可行性探索阶段|4.8|在调研整合，调研报告完成的前提下，小组进行了进一步分工。我们找到了aios论文——一篇可操作性很高的文献，小组准备集中阅读，配置环境，体验代码，试图完成一个小型的、可供参考的大模型文件管理系统，进行可行性的分析。|杨柄权：完善调研报告；刘明乐：阅读文献、体验大模型与操作系统融合方式；常圣：阅读文献、体验大模型与操作系统融合方式；李岱峰：完善github网页、阅读文献、体验大模型与操作系统融合方式|
-|进一步可行性研究|4.11|小组讨论汇报了AIOS论文的内容和各自的理解，探讨使用该模型的方法。思路一：尝试优化systemcall；思路二：扩展sdk(增加文件系统相关的sdk)；思路三：优化sdk(例如文件加密)。经讨论，我们决定先尝试阅读文件系统相关的systemcall，尝试优化它们。根据AIOS论文，我们认为这个方向是可行的，且已经经过检验的。我们决定在充分阅读代码后，进行一定的优化，来验证可行性。另读文章学习快照应用，探索AIOS能对文件管理系统做出什么更多的操作。|杨柄权：下载使用AIOS，  刘明乐：下载使用AIOS， 李岱峰： 下载使用AIOS  常圣：下载使用AIOS |
-|中期汇报准备 | 4.15 | 小组尝试试验AIOS，但遇到困难，包括网络问题和api问题，我们通过远程帮助完成了一部分可行性验证，并在今天讨论中期汇报安排。我们统一思想：这个项目起源于我们尝试为操作系统赋能，用大模型融入操作系统，我们选择了以操作系统中文件系统的角度来操作；在实际调研中，我们发现了AIOS论文，这极大的激起了我们的兴趣，我们认为我们的想法是高度可行的，并且已经有人在向这个方向努力；为此，我们进行了可行性的分析和实际困难的分析，也试图了解和体验AIOS的思路和功能；由此，我们将会在接下来的一段时间内进一步研究，尝试完成我们的设计。中期汇报内容大体以上，具体细节待讨论，主要以各人负责的模块为准。 | 杨柄权：ppt- ，刘明乐：ppt-，李岱峰：ppt-，常胜：ppt- |
-|周常讨论|4.18|小组进行周常讨论，内容：云虚拟机方案可行性基本已经论证，我们打算每人每月设立一个虚拟机，费用均摊。中期汇报方案，我们打算扩充ppt，对ppt内容进行微调，对“理论依据”部分，我们打算增加一些方面但是要缩短时间，对EXT4系统进行更详尽的分析，增加优缺点的展示和我们能做的改进(应用层面)，增加机器学习的理论。对于技术可行性方面加一些大模型框架。理论依据25％，技术可行性35％|众志成城|
-|任务记录|4.19|李岱峰、常胜实验Azure虚拟机，李岱峰承担第一阶段任务，预计3周，任务一：验证可行性（4.19完成，可行性已验证）| |
-|周常讨论|4.26|我们进行了每周的例行讨论，汇报了各自的进度，准备在五一期间进行aios细致的分析，并通过视频会议的方式，同意进度。由于临近其中，我们决定加快进度，小步快跑。|杨柄权：主持视频会议，常胜：调研向量化检索，李岱峰：调研向量化检索实现方案、会议记录，刘明乐：分析aios中如何实现向量化检索 |
-|周常讨论|5.8|我们研究认为aios的工作是通过apikey远程连接到openai等外部进行的，我们想要进一步探索向量化检索，根据一些样例来实质的将大模型本地化，构建本地索引库，摆脱远程api的限制。同时，linux本地虚拟机网络问题已经解决，意味着每个成员都可以本地运行aios的大模型| 集中调研向量化检索|
-|阶段性汇总|5.30|小组讨论，认为应该从“增删改查”出发，讨论出未来工作：1.改为动态 2.“增”，每增一个文件都需要抽象，并将信息放入documents 3.“查”：组织聚类数据结构  | 任务分配 ：  杨柄权：“增”  常胜：“查”内容 刘明乐：数据结构组织 李岱峰：改为动态|
-|任务总结| 6.27| lab4已经于6.25完成，请学长验收。大作业方面，李岱峰的任务已经几近完成，框架已经搭好，正在陆陆续续修bug。刘明乐的树状结构已经设计完成，常胜的搜索正在设计，杨柄权的任务正在计划完成。| |
-|阶段性汇总| 6.30|我们认为聚类的效果不好，我们打算直接对document进行操作。|李岱峰：删除聚类，只保留学习到documents里，搜索时按照document查；杨柄权写搜索，常胜和刘明乐写llama3|
+Great breakthroughs have been made in the development of large language models in recent years. At present, many researchers have applied large language models to operating systems. For example, the recently published large language model is an important achievement in the application of operating system level. File system is an important part of the operating system, and there are many ways to explore its optimization direction and improvement. The team investigated three large language models and some of the current problems with file systems.
 
-祝debug愉快！
 
-ArkFs 团队
+We found that large models have an outstanding ability to parse human sentences, and can parse a complex sentence of text into an action that a computer can understand. Based on this capability, we think we can design a very small system to demonstrate the feasibility of combining the file system with the large language model, which interprets the human manipulation language and then hands it over to the file system for manipulation.
+
+
+Inspired by AIOS, we embed the big model into the file system, use the big model to understand the user's text semantics, and realize the operation of adding, deleting and searching files. The innovation of this project is to use a large model to understand user needs and form a task queue for file operation without manual intervention. The large model is deployed locally to learn local files and realize vectorization retrieval.
+
+
+## project schedule
+
+2024.7.6 The project theme has been completed, and voice control at the combined logic level can be realized.
+
+Example: Voice input "Please find some pictures with grass, throw them into a new folder", after the execution is completed, the computer will complete the corresponding operation.
+
+See the demo video for the effects. See the .\docs\final_report\video folder.
+
+## How to use
+
+This project supports windows, please enter the following on the windows command line:
+> set GEMINI_API_KEY="your_google_gemini_api_key"
+
+Then switch to the src directory and run
+> python main.py
+
+## 后续支持
+
+For any questions, please contact feng1702@mail.ustc.edu.cn
+
+Happy debug!
+
+ArkFs team

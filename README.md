@@ -1,5 +1,5 @@
 # ArkFS
-A LLM embeded file system
+An LLM embeded file system
 #### group member
 杨柄权、刘明乐、李岱峰、常圣
 
